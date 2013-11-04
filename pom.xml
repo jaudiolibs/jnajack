@@ -4,7 +4,7 @@
 
   <groupId>org.jaudiolibs</groupId>
   <artifactId>jnajack</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>jnajack</name>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>3.4.0</version>
+      <version>4.0.0</version>
     </dependency>
   </dependencies>
 </project>
