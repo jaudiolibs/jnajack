@@ -257,205 +257,205 @@ public interface JackLibrary extends com.sun.jna.Library {
     public static final long JACK_MAX_FRAMES = (4294967295L);
     /// <i>native declaration : ./jack/types.h:458</i>
 
-    public static class jack_position_t extends com.sun.jna.Structure {
-        /// Allocate a new jack_position_t struct on the heap
-
-        public jack_position_t() {
-        }
-        /// Cast data at given memory location (pointer + offset) as an existing jack_position_t struct
-
-        public jack_position_t(com.sun.jna.Pointer pointer, int offset) {
-            super();
-            useMemory(pointer, offset);
-            read();
-        }
-        /// Create an instance that shares its memory with another jack_position_t instance
-
-        public jack_position_t(jack_position_t struct) {
-            this(struct.getPointer(), 0);
-        }
-
-        public static class ByReference extends jack_position_t implements com.sun.jna.Structure.ByReference {
-            /// Allocate a new jack_position_t.ByRef struct on the heap
-
-            public ByReference() {
-            }
-            /// Create an instance that shares its memory with another jack_position_t instance
-
-            public ByReference(jack_position_t struct) {
-                super(struct.getPointer(), 0);
-            }
-        }
-
-        public static class ByValue extends jack_position_t implements com.sun.jna.Structure.ByValue {
-            /// Allocate a new jack_position_t.ByVal struct on the heap
-
-            public ByValue() {
-            }
-            /// Create an instance that shares its memory with another jack_position_t instance
-
-            public ByValue(jack_position_t struct) {
-                super(struct.getPointer(), 0);
-            }
-        }
-        /**
-         * these four cannot be set from clients: the server sets them
-         * < unique ID
-         */
-        public long unique_1;
-        /// Conversion Error : _jack_time_t
-        /// < current frame rate (per second)
-        public int frame_rate;
-        /// < frame number, always present
-        public int frame;
-        /**
-         * @see jack_position_bits_t
-         * < which other fields are valid
-         */
-        public int valid;
-        /**
-         * JackPositionBBT fields:
-         * < current bar
-         */
-        public int bar;
-        /// < current beat-within-bar
-        public int beat;
-        /// < current tick-within-beat
-        public int tick;
-        public double bar_start_tick;
-        /// < time signature "numerator"
-        public float beats_per_bar;
-        /// < time signature "denominator"
-        public float beat_type;
-        public double ticks_per_beat;
-        public double beats_per_minute;
-        /**
-         * JackPositionTimecode fields:	(EXPERIMENTAL: could change)
-         * < current time in seconds
-         */
-        public double frame_time;
-        /**
-         * < next sequential frame_time
-         * (unless repositioned)
-         */
-        public double next_time;
-        /**
-         * JackBBTFrameOffset fields:
-         * < frame offset for the BBT fields
-         * (the given bar, beat, and tick
-         * values actually refer to a time
-         * frame_offset frames before the
-         * start of the cycle), should
-         * be assumed to be 0 if
-         * JackBBTFrameOffset is not
-         * set. If JackBBTFrameOffset is
-         * set and this value is zero, the BBT
-         * time refers to the first frame of this
-         * cycle. If the value is positive,
-         * the BBT time refers to a frame that
-         * many frames before the start of the
-         * cycle.
-         */
-        public int bbt_offset;
-        /**
-         * < number of audio frames
-         * per video frame. Should be assumed
-         * zero if JackAudioVideoRatio is not
-         * set. If JackAudioVideoRatio is set
-         * and the value is zero, no video
-         * data exists within the JACK graph
-         */
-        public float audio_frames_per_video_frame;
-        /**
-         * < audio frame at which the first video
-         * frame in this cycle occurs. Should
-         * be assumed to be 0 if JackVideoFrameOffset
-         * is not set. If JackVideoFrameOffset is
-         * set, but the value is zero, there is
-         * no video frame within this cycle.
-         */
-        public int video_offset;
-        /**
-         * For binary compatibility, new fields should be allocated from
-         * this padding area with new valid bits controlling access, so
-         * the existing structure size and offsets are preserved.
-         */
-        public int[] padding = new int[(7)];
-        /**
-         * When (unique_1 == unique_2) the contents are consistent.
-         * < unique ID
-         */
-        public long unique_2;
-    }
+//    public static class jack_position_t extends com.sun.jna.Structure {
+//        /// Allocate a new jack_position_t struct on the heap
+//
+//        public jack_position_t() {
+//        }
+//        /// Cast data at given memory location (pointer + offset) as an existing jack_position_t struct
+//
+//        public jack_position_t(com.sun.jna.Pointer pointer, int offset) {
+//            super();
+//            useMemory(pointer, offset);
+//            read();
+//        }
+//        /// Create an instance that shares its memory with another jack_position_t instance
+//
+//        public jack_position_t(jack_position_t struct) {
+//            this(struct.getPointer(), 0);
+//        }
+//
+//        public static class ByReference extends jack_position_t implements com.sun.jna.Structure.ByReference {
+//            /// Allocate a new jack_position_t.ByRef struct on the heap
+//
+//            public ByReference() {
+//            }
+//            /// Create an instance that shares its memory with another jack_position_t instance
+//
+//            public ByReference(jack_position_t struct) {
+//                super(struct.getPointer(), 0);
+//            }
+//        }
+//
+//        public static class ByValue extends jack_position_t implements com.sun.jna.Structure.ByValue {
+//            /// Allocate a new jack_position_t.ByVal struct on the heap
+//
+//            public ByValue() {
+//            }
+//            /// Create an instance that shares its memory with another jack_position_t instance
+//
+//            public ByValue(jack_position_t struct) {
+//                super(struct.getPointer(), 0);
+//            }
+//        }
+//        /**
+//         * these four cannot be set from clients: the server sets them
+//         * < unique ID
+//         */
+//        public long unique_1;
+//        /// Conversion Error : _jack_time_t
+//        /// < current frame rate (per second)
+//        public int frame_rate;
+//        /// < frame number, always present
+//        public int frame;
+//        /**
+//         * @see jack_position_bits_t
+//         * < which other fields are valid
+//         */
+//        public int valid;
+//        /**
+//         * JackPositionBBT fields:
+//         * < current bar
+//         */
+//        public int bar;
+//        /// < current beat-within-bar
+//        public int beat;
+//        /// < current tick-within-beat
+//        public int tick;
+//        public double bar_start_tick;
+//        /// < time signature "numerator"
+//        public float beats_per_bar;
+//        /// < time signature "denominator"
+//        public float beat_type;
+//        public double ticks_per_beat;
+//        public double beats_per_minute;
+//        /**
+//         * JackPositionTimecode fields:	(EXPERIMENTAL: could change)
+//         * < current time in seconds
+//         */
+//        public double frame_time;
+//        /**
+//         * < next sequential frame_time
+//         * (unless repositioned)
+//         */
+//        public double next_time;
+//        /**
+//         * JackBBTFrameOffset fields:
+//         * < frame offset for the BBT fields
+//         * (the given bar, beat, and tick
+//         * values actually refer to a time
+//         * frame_offset frames before the
+//         * start of the cycle), should
+//         * be assumed to be 0 if
+//         * JackBBTFrameOffset is not
+//         * set. If JackBBTFrameOffset is
+//         * set and this value is zero, the BBT
+//         * time refers to the first frame of this
+//         * cycle. If the value is positive,
+//         * the BBT time refers to a frame that
+//         * many frames before the start of the
+//         * cycle.
+//         */
+//        public int bbt_offset;
+//        /**
+//         * < number of audio frames
+//         * per video frame. Should be assumed
+//         * zero if JackAudioVideoRatio is not
+//         * set. If JackAudioVideoRatio is set
+//         * and the value is zero, no video
+//         * data exists within the JACK graph
+//         */
+//        public float audio_frames_per_video_frame;
+//        /**
+//         * < audio frame at which the first video
+//         * frame in this cycle occurs. Should
+//         * be assumed to be 0 if JackVideoFrameOffset
+//         * is not set. If JackVideoFrameOffset is
+//         * set, but the value is zero, there is
+//         * no video frame within this cycle.
+//         */
+//        public int video_offset;
+//        /**
+//         * For binary compatibility, new fields should be allocated from
+//         * this padding area with new valid bits controlling access, so
+//         * the existing structure size and offsets are preserved.
+//         */
+//        public int[] padding = new int[(7)];
+//        /**
+//         * When (unique_1 == unique_2) the contents are consistent.
+//         * < unique ID
+//         */
+//        public long unique_2;
+//    }
     /// <i>native declaration : ./jack/types.h:613</i>
 
-    public static class jack_transport_info_t extends com.sun.jna.Structure {
-        /// Allocate a new jack_transport_info_t struct on the heap
-
-        public jack_transport_info_t() {
-        }
-        /// Cast data at given memory location (pointer + offset) as an existing jack_transport_info_t struct
-
-        public jack_transport_info_t(com.sun.jna.Pointer pointer, int offset) {
-            super();
-            useMemory(pointer, offset);
-            read();
-        }
-        /// Create an instance that shares its memory with another jack_transport_info_t instance
-
-        public jack_transport_info_t(jack_transport_info_t struct) {
-            this(struct.getPointer(), 0);
-        }
-
-        public static class ByReference extends jack_transport_info_t implements com.sun.jna.Structure.ByReference {
-            /// Allocate a new jack_transport_info_t.ByRef struct on the heap
-
-            public ByReference() {
-            }
-            /// Create an instance that shares its memory with another jack_transport_info_t instance
-
-            public ByReference(jack_transport_info_t struct) {
-                super(struct.getPointer(), 0);
-            }
-        }
-
-        public static class ByValue extends jack_transport_info_t implements com.sun.jna.Structure.ByValue {
-            /// Allocate a new jack_transport_info_t.ByVal struct on the heap
-
-            public ByValue() {
-            }
-            /// Create an instance that shares its memory with another jack_transport_info_t instance
-
-            public ByValue(jack_transport_info_t struct) {
-                super(struct.getPointer(), 0);
-            }
-        }
-        /// < current frame rate (per second)
-        public int frame_rate;
-        /// Conversion Error : _jack_time_t
-        /**
-         * @see jack_transport_bits_t
-         * < which fields are legal to read
-         */
-        public int valid;
-        /// @see jack_transport_state_t
-        public int transport_state;
-        public int frame;
-        public int loop_start;
-        public int loop_end;
-        /// < SMPTE offset (from frame 0)
-        public com.sun.jna.NativeLong smpte_offset;
-        /// < 29.97, 30, 24 etc.
-        public float smpte_frame_rate;
-        public int bar;
-        public int beat;
-        public int tick;
-        public double bar_start_tick;
-        public float beats_per_bar;
-        public float beat_type;
-        public double ticks_per_beat;
-        public double beats_per_minute;
-    }
+//    public static class jack_transport_info_t extends com.sun.jna.Structure {
+//        /// Allocate a new jack_transport_info_t struct on the heap
+//
+//        public jack_transport_info_t() {
+//        }
+//        /// Cast data at given memory location (pointer + offset) as an existing jack_transport_info_t struct
+//
+//        public jack_transport_info_t(com.sun.jna.Pointer pointer, int offset) {
+//            super();
+//            useMemory(pointer, offset);
+//            read();
+//        }
+//        /// Create an instance that shares its memory with another jack_transport_info_t instance
+//
+//        public jack_transport_info_t(jack_transport_info_t struct) {
+//            this(struct.getPointer(), 0);
+//        }
+//
+//        public static class ByReference extends jack_transport_info_t implements com.sun.jna.Structure.ByReference {
+//            /// Allocate a new jack_transport_info_t.ByRef struct on the heap
+//
+//            public ByReference() {
+//            }
+//            /// Create an instance that shares its memory with another jack_transport_info_t instance
+//
+//            public ByReference(jack_transport_info_t struct) {
+//                super(struct.getPointer(), 0);
+//            }
+//        }
+//
+//        public static class ByValue extends jack_transport_info_t implements com.sun.jna.Structure.ByValue {
+//            /// Allocate a new jack_transport_info_t.ByVal struct on the heap
+//
+//            public ByValue() {
+//            }
+//            /// Create an instance that shares its memory with another jack_transport_info_t instance
+//
+//            public ByValue(jack_transport_info_t struct) {
+//                super(struct.getPointer(), 0);
+//            }
+//        }
+//        /// < current frame rate (per second)
+//        public int frame_rate;
+//        /// Conversion Error : _jack_time_t
+//        /**
+//         * @see jack_transport_bits_t
+//         * < which fields are legal to read
+//         */
+//        public int valid;
+//        /// @see jack_transport_state_t
+//        public int transport_state;
+//        public int frame;
+//        public int loop_start;
+//        public int loop_end;
+//        /// < SMPTE offset (from frame 0)
+//        public com.sun.jna.NativeLong smpte_offset;
+//        /// < 29.97, 30, 24 etc.
+//        public float smpte_frame_rate;
+//        public int bar;
+//        public int beat;
+//        public int tick;
+//        public double bar_start_tick;
+//        public float beats_per_bar;
+//        public float beat_type;
+//        public double ticks_per_beat;
+//        public double beats_per_minute;
+//    }
 
     /**
      * Prototype for the client supplied function that is called
@@ -647,70 +647,70 @@ public interface JackLibrary extends com.sun.jna.Library {
         void invoke(com.sun.jna.Pointer arg);
     }
 
-    /**
-     * Prototype for the @a sync_callback defined by slow-sync clients.
-     * When the client is active, this callback is invoked just before
-     * process() in the same thread.  This occurs once after registration,
-     * then subsequently whenever some client requests a new position, or
-     * the transport enters the ::JackTransportStarting state.  This
-     * realtime function must not wait.
-     * * The transport @a state will be:
-     * *   - ::JackTransportStopped when a new position is requested;
-     *   - ::JackTransportStarting when the transport is waiting to start;
-     *   - ::JackTransportRolling when the timeout has expired, and the
-     *   position is now a moving target.
-     * * @param state current transport state.
-     * @param pos new transport position.
-     * @param arg the argument supplied by jack_set_sync_callback().
-     * * @return TRUE (non-zero) when ready to roll.
-     * <i>native declaration : ./jack/types.h</i>
-     */
-    public interface JackSyncCallback extends com.sun.jna.Callback {
-        /// @param state @see jack_transport_state_t
+//    /**
+//     * Prototype for the @a sync_callback defined by slow-sync clients.
+//     * When the client is active, this callback is invoked just before
+//     * process() in the same thread.  This occurs once after registration,
+//     * then subsequently whenever some client requests a new position, or
+//     * the transport enters the ::JackTransportStarting state.  This
+//     * realtime function must not wait.
+//     * * The transport @a state will be:
+//     * *   - ::JackTransportStopped when a new position is requested;
+//     *   - ::JackTransportStarting when the transport is waiting to start;
+//     *   - ::JackTransportRolling when the timeout has expired, and the
+//     *   position is now a moving target.
+//     * * @param state current transport state.
+//     * @param pos new transport position.
+//     * @param arg the argument supplied by jack_set_sync_callback().
+//     * * @return TRUE (non-zero) when ready to roll.
+//     * <i>native declaration : ./jack/types.h</i>
+//     */
+//    public interface JackSyncCallback extends com.sun.jna.Callback {
+//        /// @param state @see jack_transport_state_t
+//
+//        int invoke(int state, jack_position_t pos, com.sun.jna.Pointer arg);
+//    }
 
-        int invoke(int state, jack_position_t pos, com.sun.jna.Pointer arg);
-    }
-
-    /**
-     * Prototype for the @a timebase_callback used to provide extended
-     * position information.  Its output affects all of the following
-     * process cycle.  This realtime function must not wait.
-     * * This function is called immediately after process() in the same
-     * thread whenever the transport is rolling, or when any client has
-     * requested a new position in the previous cycle.  The first cycle
-     * after jack_set_timebase_callback() is also treated as a new
-     * position, or the first cycle after jack_activate() if the client
-     * had been inactive.
-     * * The timebase master may not use its @a pos argument to set @a
-     * pos->frame.  To change position, use jack_transport_reposition() or
-     * jack_transport_locate().  These functions are realtime-safe, the @a
-     * timebase_callback can call them directly.
-     * * @param state current transport state.
-     * @param nframes number of frames in current period.
-     * @param pos address of the position structure for the next cycle; @a
-     * pos->frame will be its frame number.  If @a new_pos is FALSE, this
-     * structure contains extended position information from the current
-     * cycle.  If TRUE, it contains whatever was set by the requester.
-     * The @a timebase_callback's task is to update the extended
-     * information here.
-     * @param new_pos TRUE (non-zero) for a newly requested @a pos, or for
-     * the first cycle after the @a timebase_callback is defined.
-     * @param arg the argument supplied by jack_set_timebase_callback().
-     * <i>native declaration : ./jack/types.h</i>
-     */
-    public interface JackTimebaseCallback extends com.sun.jna.Callback {
-        /// @param state @see jack_transport_state_t
-
-        /**
-         *
-         * @param state
-         * @param nframes
-         * @param pos
-         * @param new_pos
-         * @param arg
-         */
-        void invoke(int state, int nframes, jack_position_t pos, int new_pos, com.sun.jna.Pointer arg);
-    }
+//    /**
+//     * Prototype for the @a timebase_callback used to provide extended
+//     * position information.  Its output affects all of the following
+//     * process cycle.  This realtime function must not wait.
+//     * * This function is called immediately after process() in the same
+//     * thread whenever the transport is rolling, or when any client has
+//     * requested a new position in the previous cycle.  The first cycle
+//     * after jack_set_timebase_callback() is also treated as a new
+//     * position, or the first cycle after jack_activate() if the client
+//     * had been inactive.
+//     * * The timebase master may not use its @a pos argument to set @a
+//     * pos->frame.  To change position, use jack_transport_reposition() or
+//     * jack_transport_locate().  These functions are realtime-safe, the @a
+//     * timebase_callback can call them directly.
+//     * * @param state current transport state.
+//     * @param nframes number of frames in current period.
+//     * @param pos address of the position structure for the next cycle; @a
+//     * pos->frame will be its frame number.  If @a new_pos is FALSE, this
+//     * structure contains extended position information from the current
+//     * cycle.  If TRUE, it contains whatever was set by the requester.
+//     * The @a timebase_callback's task is to update the extended
+//     * information here.
+//     * @param new_pos TRUE (non-zero) for a newly requested @a pos, or for
+//     * the first cycle after the @a timebase_callback is defined.
+//     * @param arg the argument supplied by jack_set_timebase_callback().
+//     * <i>native declaration : ./jack/types.h</i>
+//     */
+//    public interface JackTimebaseCallback extends com.sun.jna.Callback {
+//        /// @param state @see jack_transport_state_t
+//
+//        /**
+//         *
+//         * @param state
+//         * @param nframes
+//         * @param pos
+//         * @param new_pos
+//         * @param arg
+//         */
+//        void invoke(int state, int nframes, jack_position_t pos, int new_pos, com.sun.jna.Pointer arg);
+//    }
     /// <i>native declaration : jack/jack.h:998</i>
 
     public interface jack_error_callback extends com.sun.jna.Callback {
