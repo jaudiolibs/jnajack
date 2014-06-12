@@ -23,11 +23,14 @@
  */
 package org.jaudiolibs.jnajack.lowlevel;
 
-import com.sun.jna.Memory;
+import com.sun.jna.IntegerType;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
+import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * JNA wrapper to the JACK library.
@@ -50,8 +53,7 @@ public interface JackLibrary extends com.sun.jna.Library {
     public static interface jack_transport_state_t {
 
         /**
-         * the order matters for binary compatibility
-         * < Transport halted
+         * the order matters for binary compatibility < Transport halted
          */
         public static final int JackTransportStopped = 0;
         /// < Transport playing
@@ -101,52 +103,46 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * A port has a set of flags that are formed by AND-ing together the
-     *  desired values from the list below. The flags "JackPortIsInput" and
-     *  "JackPortIsOutput" are mutually exclusive and it is an error to use
-     *  them both.
+     * A port has a set of flags that are formed by AND-ing together the desired
+     * values from the list below. The flags "JackPortIsInput" and
+     * "JackPortIsOutput" are mutually exclusive and it is an error to use them
+     * both.
      * <i>native declaration : ./jack/types.h:244</i>
      * enum values
      */
     public static interface JackPortFlags {
 
         /**
-         * if JackPortIsInput is set, then the port can receive
-         * data.
+         * if JackPortIsInput is set, then the port can receive data.
          */
         public static final int JackPortIsInput = 1;
         /**
-         * if JackPortIsOutput is set, then data can be read from
-         * the port.
+         * if JackPortIsOutput is set, then data can be read from the port.
          */
         public static final int JackPortIsOutput = 2;
         /**
-         * if JackPortIsPhysical is set, then the port corresponds
-         * to some kind of physical I/O connector.
+         * if JackPortIsPhysical is set, then the port corresponds to some kind
+         * of physical I/O connector.
          */
         public static final int JackPortIsPhysical = 4;
         /**
          * if JackPortCanMonitor is set, then a call to
-         * jack_port_request_monitor() makes sense.
-         * * Precisely what this means is dependent on the client. A typical
-         * result of it being called with TRUE as the second argument is
-         * that data that would be available from an output port (with
-         * JackPortIsPhysical set) is sent to a physical output connector
-         * as well, so that it can be heard/seen/whatever.
-         * * Clients that do not control physical interfaces
-         * should never create ports with this bit set.
+         * jack_port_request_monitor() makes sense. * Precisely what this means
+         * is dependent on the client. A typical result of it being called with
+         * TRUE as the second argument is that data that would be available from
+         * an output port (with JackPortIsPhysical set) is sent to a physical
+         * output connector as well, so that it can be heard/seen/whatever. *
+         * Clients that do not control physical interfaces should never create
+         * ports with this bit set.
          */
         public static final int JackPortCanMonitor = 8;
         /**
-         * JackPortIsTerminal means:
-         * *	for an input port: the data received by the port
-         *                    will not be passed on or made
-         * 	           available at any other port
-         * * for an output port: the data available at the port
-         *                    does not originate from any other port
-         * * Audio synthesizers, I/O hardware interface clients, HDR
-         * systems are examples of clients that would set this flag for
-         * their ports.
+         * JackPortIsTerminal means: *	for an input port: the data received by
+         * the port will not be passed on or made available at any other port *
+         * for an output port: the data available at the port does not originate
+         * from any other port * Audio synthesizers, I/O hardware interface
+         * clients, HDR systems are examples of clients that would set this flag
+         * for their ports.
          */
         public static final int JackPortIsTerminal = 16;
     }
@@ -161,22 +157,21 @@ public interface JackLibrary extends com.sun.jna.Library {
 
         public static final int JackNullOption = 0;
         /**
-         * Do not automatically start the JACK server when it is not
-         * already running.  This option is always selected if
-         * \$JACK_NO_START_SERVER is defined in the calling process
-         * environment.
+         * Do not automatically start the JACK server when it is not already
+         * running. This option is always selected if \$JACK_NO_START_SERVER is
+         * defined in the calling process environment.
          */
         public static final int JackNoStartServer = 1;
         /**
-         * Use the exact client name requested.  Otherwise, JACK
-         * automatically generates a unique one, if needed.
+         * Use the exact client name requested. Otherwise, JACK automatically
+         * generates a unique one, if needed.
          */
         public static final int JackUseExactName = 2;
         /// Open with optional <em>(char *) server_name</em> parameter.
         public static final int JackServerName = 4;
         /**
-         * Load internal client from optional <em>(char *)
-         * load_name</em>.  Otherwise use the @a client_name.
+         * Load internal client from optional <em>(char *) load_name</em>.
+         * Otherwise use the @a client_name.
          */
         public static final int JackLoadName = 8;
         /**
@@ -198,20 +193,19 @@ public interface JackLibrary extends com.sun.jna.Library {
         /// The operation contained an invalid or unsupported option.
         public static final int JackInvalidOption = 2;
         /**
-         * The desired client name was not unique.  With the @ref
-         * JackUseExactName option this situation is fatal.  Otherwise,
-         * the name was modified by appending a dash and a two-digit
-         * number in the range "-01" to "-99".  The
-         * jack_get_client_name() function will return the exact string
-         * that was used.  If the specified @a client_name plus these
-         * extra characters would be too long, the open fails instead.
+         * The desired client name was not unique. With the @ref
+         * JackUseExactName option this situation is fatal. Otherwise, the name
+         * was modified by appending a dash and a two-digit number in the range
+         * "-01" to "-99". The jack_get_client_name() function will return the
+         * exact string that was used. If the specified @a client_name plus
+         * these extra characters would be too long, the open fails instead.
          */
         public static final int JackNameNotUnique = 4;
         /**
-         * The JACK server was started as a result of this operation.
-         * Otherwise, it was running already.  In either case the caller
-         * is now connected to jackd, so there is no race condition.
-         * When the server shuts down, the client will find out.
+         * The JACK server was started as a result of this operation. Otherwise,
+         * it was running already. In either case the caller is now connected to
+         * jackd, so there is no race condition. When the server shuts down, the
+         * client will find out.
          */
         public static final int JackServerStarted = 8;
         /// Unable to connect to the JACK server.
@@ -230,14 +224,12 @@ public interface JackLibrary extends com.sun.jna.Library {
         public static final int JackVersionError = 1024;
     }
     /**
-     * define
-     * SKIPPED:
+     * define SKIPPED:
      * <i>native declaration : ./jack/types.h</i>
      * (JackPositionBBT | JackPositionTimecode)
      */
     /**
-     * define
-     * SKIPPED:
+     * define SKIPPED:
      * <i>native declaration : ./jack/types.h</i>
      * (JackLoadInit | JackLoadName | JackUseExactName)
      */
@@ -248,8 +240,7 @@ public interface JackLibrary extends com.sun.jna.Library {
     /// <i>native declaration : ./jack/types.h</i>
     public static final int JACK_LOAD_INIT_LIMIT = 1024;
     /**
-     * define
-     * SKIPPED:
+     * define SKIPPED:
      * <i>native declaration : ./jack/types.h</i>
      * (JackServerName | JackNoStartServer | JackUseExactName)
      */
@@ -388,7 +379,6 @@ public interface JackLibrary extends com.sun.jna.Library {
 //        public long unique_2;
 //    }
     /// <i>native declaration : ./jack/types.h:613</i>
-
 //    public static class jack_transport_info_t extends com.sun.jna.Structure {
 //        /// Allocate a new jack_transport_info_t struct on the heap
 //
@@ -456,10 +446,10 @@ public interface JackLibrary extends com.sun.jna.Library {
 //        public double ticks_per_beat;
 //        public double beats_per_minute;
 //    }
-
     /**
-     * Prototype for the client supplied function that is called
-     * by the engine anytime there is work to be done.
+     * Prototype for the client supplied function that is called by the engine
+     * anytime there is work to be done.
+     *
      * * @pre nframes == jack_get_buffer_size()
      * @pre nframes == pow(2,x)
      * * @param nframes number of frames to process
@@ -473,8 +463,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client thread routine called
-     * by the engine when the client is inserted in the graph.
+     * Prototype for the client thread routine called by the engine when the
+     * client is inserted in the graph.
+     *
      * * @param arg pointer to a client supplied structure
      * <i>native declaration : ./jack/types.h</i>
      */
@@ -484,12 +475,12 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * once after the creation of the thread in which other
-     * callbacks will be made. Special thread characteristics
-     * can be set from this callback, for example. This is a
-     * highly specialized callback and most clients will not
-     * and should not use it.
+     * Prototype for the client supplied function that is called once after the
+     * creation of the thread in which other callbacks will be made. Special
+     * thread characteristics can be set from this callback, for example. This
+     * is a highly specialized callback and most clients will not and should not
+     * use it.
+     *
      * * @param arg pointer to a client supplied structure
      * * @return void
      * <i>native declaration : ./jack/types.h</i>
@@ -500,8 +491,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever the processing graph is reordered.
+     * Prototype for the client supplied function that is called whenever the
+     * processing graph is reordered.
+     *
      * * @param arg pointer to a client supplied structure
      * * @return zero on success, non-zero on error
      * <i>native declaration : ./jack/types.h</i>
@@ -512,8 +504,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client-supplied function that is called whenever
-     * an xrun has occured.
+     * Prototype for the client-supplied function that is called whenever an
+     * xrun has occured.
+     *
      * * @see jack_get_xrun_delayed_usecs()
      * * @param arg pointer to a client supplied structure
      * * @return zero on success, non-zero on error
@@ -525,13 +518,13 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the @a bufsize_callback that is invoked whenever the
-     * JACK engine buffer size changes.  Although this function is called
-     * in the JACK process thread, the normal process cycle is suspended
-     * during its operation, causing a gap in the audio flow.  So, the @a
-     * bufsize_callback can allocate storage, touch memory not previously
-     * referenced, and perform other operations that are not realtime
-     * safe.
+     * Prototype for the @a bufsize_callback that is invoked whenever the JACK
+     * engine buffer size changes. Although this function is called in the JACK
+     * process thread, the normal process cycle is suspended during its
+     * operation, causing a gap in the audio flow. So, the @a bufsize_callback
+     * can allocate storage, touch memory not previously referenced, and perform
+     * other operations that are not realtime safe.
+     *
      * * @param nframes buffer size
      * @param arg pointer supplied by jack_set_buffer_size_callback().
      * * @return zero on success, non-zero on error
@@ -543,8 +536,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * when the engine sample rate changes.
+     * Prototype for the client supplied function that is called when the engine
+     * sample rate changes.
+     *
      * * @param nframes new engine sample rate
      * @param arg pointer to a client supplied structure
      * * @return zero on success, non-zero on error
@@ -556,8 +550,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever a port is registered or unregistered.
+     * Prototype for the client supplied function that is called whenever a port
+     * is registered or unregistered.
+     *
      * * @param arg pointer to a client supplied structure
      * <i>native declaration : ./jack/types.h</i>
      */
@@ -567,33 +562,35 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever a client is registered or unregistered.
+     * Prototype for the client supplied function that is called whenever a
+     * client is registered or unregistered.
+     *
      * * @param name a null-terminated string containing the client name
-     * @param register non-zero if the client is being registered,
-     *                     zero if the client is being unregistered
+     * @param register non-zero if the client is being registered, zero if the
+     * client is being unregistered
      * @param arg pointer to a client supplied structure
      * <i>native declaration : ./jack/types.h</i>
      */
     public interface JackClientRegistrationCallback extends com.sun.jna.Callback {
 
         /**
-         * 
+         *
          * @param name a null-terminated string containing the client name
-         * @param register non-zero if the client is being registered,
-         *                     zero if the client is being unregistered
+         * @param register non-zero if the client is being registered, zero if
+         * the client is being unregistered
          * @param arg pointer to a client supplied structure
          */
         void invoke(com.sun.jna.ptr.ByteByReference name, int register, com.sun.jna.Pointer arg);
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever a client is registered or unregistered.
+     * Prototype for the client supplied function that is called whenever a
+     * client is registered or unregistered.
+     *
      * * @param a one of two ports connected or disconnected
      * @param b one of two ports connected or disconnected
-     * @param connect non-zero if ports were connected
-     *                    zero if ports were disconnected
+     * @param connect non-zero if ports were connected zero if ports were
+     * disconnected
      * @param arg pointer to a client supplied data
      * <i>native declaration : ./jack/types.h</i>
      */
@@ -603,16 +600,17 @@ public interface JackLibrary extends com.sun.jna.Library {
          *
          * @param a one of two ports connected or disconnected
          * @param b one of two ports connected or disconnected
-         * @param connect non-zero if ports were connected
-         *                    zero if ports were disconnected
+         * @param connect non-zero if ports were connected zero if ports were
+         * disconnected
          * @param arg pointer to a client supplied data
          */
         void invoke(int a, int b, int connect, com.sun.jna.Pointer arg);
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever the port name has been changed.
+     * Prototype for the client supplied function that is called whenever the
+     * port name has been changed.
+     *
      * * @param port the port that has been renamed
      * @param new_name the new name
      * @param arg pointer to a client supplied structure
@@ -625,9 +623,11 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever jackd starts or stops freewheeling.
-     * * @param starting non-zero if we start starting to freewheel, zero otherwise
+     * Prototype for the client supplied function that is called whenever jackd
+     * starts or stops freewheeling.
+     *
+     * * @param starting non-zero if we start starting to freewheel, zero
+     * otherwise
      * @param arg pointer to a client supplied structure
      * <i>native declaration : ./jack/types.h</i>
      */
@@ -637,8 +637,9 @@ public interface JackLibrary extends com.sun.jna.Library {
     }
 
     /**
-     * Prototype for the client supplied function that is called
-     * whenever jackd is shutdown.
+     * Prototype for the client supplied function that is called whenever jackd
+     * is shutdown.
+     *
      * * @param arg pointer to a client supplied structure
      * <i>native declaration : ./jack/types.h</i>
      */
@@ -670,7 +671,6 @@ public interface JackLibrary extends com.sun.jna.Library {
 //
 //        int invoke(int state, jack_position_t pos, com.sun.jna.Pointer arg);
 //    }
-
 //    /**
 //     * Prototype for the @a timebase_callback used to provide extended
 //     * position information.  Its output affects all of the following
@@ -712,7 +712,6 @@ public interface JackLibrary extends com.sun.jna.Library {
 //        void invoke(int state, int nframes, jack_position_t pos, int new_pos, com.sun.jna.Pointer arg);
 //    }
     /// <i>native declaration : jack/jack.h:998</i>
-
     public interface jack_error_callback extends com.sun.jna.Callback {
 
         void invoke(com.sun.jna.ptr.ByteByReference msg);
@@ -757,34 +756,33 @@ public interface JackLibrary extends com.sun.jna.Library {
 //     */
 ////	// @com.ochafik.lang.jnaerator.Mangling({"_Z23jack_get_version_stringv", "?jack_get_version_string@@YAPADXZ"})
 //    String jack_get_version_string();
-
     /**
-     * Open an external client session with a JACK server.  This interface
-     * is more complex but more powerful than jack_client_new().  With it,
-     * clients may choose which of several servers to connect, and control
-     * whether and how to start the server automatically, if it was not
-     * already running.  There is also an option for JACK to generate a
-     * unique client name, when necessary.
-     * * @param client_name of at most jack_client_name_size() characters.
-     * The name scope is local to each server.  Unless forbidden by the
-     * @ref JackUseExactName option, the server will modify this name to
-     * create a unique variant, if needed.
-     * * @param options formed by OR-ing together @ref JackOptions bits.
-     * Only the @ref JackOpenOptions bits are allowed.
-     * * @param status (if non-NULL) an address for JACK to return
-     * information from the open operation.  This status word is formed by
-     * OR-ing together the relevant @ref JackStatus bits.
-     * *
-     * <b>Optional parameters:</b> depending on corresponding [@a options
-     * bits] additional parameters may follow @a status (in this order).
-     * * @arg [@ref JackServerName] <em>(char *) server_name</em> selects
-     * from among several possible concurrent server instances.  Server
-     * names are unique to each user.  If unspecified, use "default"
-     * unless \$JACK_DEFAULT_SERVER is defined in the process environment.
-     * * @return Opaque client handle if successful.  If this is NULL, the
-     * open operation failed, @a *status includes @ref JackFailure and the
-     * caller is not a JACK client.
-     * Original signature : <code>jack_client_t* jack_client_open(const char*, jack_options_t, jack_status_t*, null)</code>
+     * Open an external client session with a JACK server. This interface is
+     * more complex but more powerful than jack_client_new(). With it, clients
+     * may choose which of several servers to connect, and control whether and
+     * how to start the server automatically, if it was not already running.
+     * There is also an option for JACK to generate a unique client name, when
+     * necessary.
+     *
+     * * @param client_name of at most jack_client_name_size() characters. The
+     * name scope is local to each server. Unless forbidden by the
+     * @ref JackUseExactName option, the server will modify this name to create
+     * a unique variant, if needed.
+     * * @param options formed by OR-ing together @ref JackOptions bits. Only
+     * the @ref JackOpenOptions bits are allowed.
+     * * @param status (if non-NULL) an address for JACK to return information
+     * from the open operation. This status word is formed by OR-ing together
+     * the relevant @ref JackStatus bits. * <b>Optional parameters:</b>
+     * depending on corresponding [@a options bits] additional parameters may
+     * follow @a status (in this order).
+     * * @arg [@ref JackServerName] <em>(char *) server_name</em> selects from
+     * among several possible concurrent server instances. Server names are
+     * unique to each user. If unspecified, use "default" unless
+     * \$JACK_DEFAULT_SERVER is defined in the process environment.
+     * * @return Opaque client handle if successful. If this is NULL, the open
+     * operation failed, @a *status includes @ref JackFailure and the caller is
+     * not a JACK client. Original signature :
+     * <code>jack_client_t* jack_client_open(const char*, jack_options_t, jack_status_t*, null)</code>
      * <i>native declaration : jack/jack.h:96</i>
      * @param options @see JackOptions
      */
@@ -794,28 +792,29 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * Disconnects an external client from a JACK server.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_client_close(jack_client_t*)</code>
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_client_close(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:112</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z17jack_client_closeP12_jack_client", "?jack_client_close@@YAHPA12_jack_client@Z"})
     int jack_client_close(_jack_client client);
 
     /**
-     * @return the maximum number of characters in a JACK client name
-     * including the final NULL character.  This value is a constant.
-     * Original signature : <code>int jack_client_name_size()</code>
+     * @return the maximum number of characters in a JACK client name including
+     * the final NULL character. This value is a constant. Original signature :
+     * <code>int jack_client_name_size()</code>
      * <i>native declaration : jack/jack.h:118</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z21jack_client_name_sizev", "?jack_client_name_size@@YAHXZ"})
     int jack_client_name_size();
 
     /**
-     * @return pointer to actual client name.  This is useful when @ref
-     * JackUseExactName is not specified on open and @ref
-     * JackNameNotUnique status was returned.  In that case, the actual
-     * name will differ from the @a client_name requested.
-     * Original signature : <code>char* jack_get_client_name(jack_client_t*)</code>
+     * @return pointer to actual client name. This is useful when @ref
+     * JackUseExactName is not specified on open and @ref JackNameNotUnique
+     * status was returned. In that case, the actual name will differ from the
+     * @a client_name requested. Original signature :
+     * <code>char* jack_get_client_name(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:126</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_get_client_nameP12_jack_client", "?jack_get_client_name@@YAPADPA12_jack_client@Z"})
@@ -829,12 +828,11 @@ public interface JackLibrary extends com.sun.jna.Library {
 //     */
 ////	// @com.ochafik.lang.jnaerator.Mangling({"_Z19jack_get_client_pidPKc", "?jack_get_client_pid@@YAHPAD@Z"})
 //    int jack_get_client_pid(java.lang.String name);
-
     /**
-     * @param client pointer to JACK client structure.
-     * * Check if the JACK subsystem is running with -R (--realtime).
-     * * @return 1 if JACK is running realtime, 0 otherwise
-     * Original signature : <code>int jack_is_realtime(jack_client_t*)</code>
+     * @param client pointer to JACK client structure. * Check if the JACK
+     * subsystem is running with -R (--realtime).
+     * * @return 1 if JACK is running realtime, 0 otherwise Original signature
+     * : <code>int jack_is_realtime(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:172</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z16jack_is_realtimeP12_jack_client", "?jack_is_realtime@@YAHPA12_jack_client@Z"})
@@ -843,37 +841,35 @@ public interface JackLibrary extends com.sun.jna.Library {
     /**
      * @param client pointer to JACK client structure.
      * @param function The jack_shutdown function pointer.
-     * @param arg The arguments for the jack_shutdown function.
-     * * Register a function (and argument) to be called if and when the
-     * JACK server shuts down the client thread.  The function must
-     * be written as if it were an asynchonrous POSIX signal
-     * handler --- use only async-safe functions, and remember that it
-     * is executed from another thread.  A typical function might
-     * set a flag or write to a pipe so that the rest of the
-     * application knows that the JACK client thread has shut
-     * down.
-     * * NOTE: clients do not need to call this.  It exists only
-     * to help more complex clients understand what is going
-     * on.  It should be called before jack_client_activate().
-     * Original signature : <code>void jack_on_shutdown(jack_client_t*, JackShutdownCallback, void*)</code>
+     * @param arg The arguments for the jack_shutdown function. * Register a
+     * function (and argument) to be called if and when the JACK server shuts
+     * down the client thread. The function must be written as if it were an
+     * asynchonrous POSIX signal handler --- use only async-safe functions, and
+     * remember that it is executed from another thread. A typical function
+     * might set a flag or write to a pipe so that the rest of the application
+     * knows that the JACK client thread has shut down. * NOTE: clients do not
+     * need to call this. It exists only to help more complex clients understand
+     * what is going on. It should be called before jack_client_activate().
+     * Original signature :
+     * <code>void jack_on_shutdown(jack_client_t*, JackShutdownCallback, void*)</code>
      * <i>native declaration : jack/jack.h:192</i>
      */
     void jack_on_shutdown(_jack_client client, JackShutdownCallback shutdown_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the Jack server to call @a process_callback whenever there is
-     * work be done, passing @a arg as the second argument.
-     * * The code in the supplied function must be suitable for real-time
-     * execution.  That means that it cannot call functions that might
-     * block for a long time. This includes malloc, free, printf,
-     * pthread_mutex_lock, sleep, wait, poll, select, pthread_join,
-     * pthread_cond_wait, etc, etc. See
+     * Tell the Jack server to call @a process_callback whenever there is work
+     * be done, passing @a arg as the second argument. * The code in the
+     * supplied function must be suitable for real-time execution. That means
+     * that it cannot call functions that might block for a long time. This
+     * includes malloc, free, printf, pthread_mutex_lock, sleep, wait, poll,
+     * select, pthread_join, pthread_cond_wait, etc, etc. See
      * http://jackit.sourceforge.net/docs/design/design.html#SECTION00411000000000000000
-     * for more information.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_set_process_callback(jack_client_t*, JackProcessCallback, void*)</code>
+     * for more information. * NOTE: this function cannot be called while the
+     * client is activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_set_process_callback(jack_client_t*, JackProcessCallback, void*)</code>
      * <i>native declaration : jack/jack.h:212</i>
      */
     int jack_set_process_callback(_jack_client client, JackProcessCallback process_callback, com.sun.jna.Pointer arg);
@@ -882,8 +878,8 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Wait until this JACK client should process data.
      *
      * @param client - pointer to a JACK client structure
-     * * @return the number of frames of data to process
-     * Original signature : <code>jack_nframes_t jack_cycle_wait(jack_client_t*)</code>
+     * * @return the number of frames of data to process Original signature :
+     * <code>jack_nframes_t jack_cycle_wait(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:231</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z15jack_cycle_waitP12_jack_client", "?jack_cycle_wait@@YA8uint32_tPA12_jack_client@Z"})
@@ -893,318 +889,324 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Signal next clients in the graph.
      *
      * @param client - pointer to a JACK client structure
-     * @param status - if non-zero, calling thread should exit
-     * Original signature : <code>void jack_cycle_signal(jack_client_t*, int)</code>
+     * @param status - if non-zero, calling thread should exit Original
+     * signature : <code>void jack_cycle_signal(jack_client_t*, int)</code>
      * <i>native declaration : jack/jack.h:239</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z17jack_cycle_signalP12_jack_clienti", "?jack_cycle_signal@@YAXPA12_jack_clientH@Z"})
     void jack_cycle_signal(_jack_client client, int status);
 
     /**
-     * Tell the Jack server to call @a thread_callback in the RT thread.
-     * Typical use are in conjunction with @a jack_cycle_wait and @ jack_cycle_signal functions.
-     * The code in the supplied function must be suitable for real-time
-     * execution.  That means that it cannot call functions that might
+     * Tell the Jack server to call @a thread_callback in the RT thread. Typical
+     * use are in conjunction with @a jack_cycle_wait and @ jack_cycle_signal
+     * functions. The code in the supplied function must be suitable for
+     * real-time execution. That means that it cannot call functions that might
      * block for a long time. This includes malloc, free, printf,
      * pthread_mutex_lock, sleep, wait, poll, select, pthread_join,
      * pthread_cond_wait, etc, etc. See
      * http://jackit.sourceforge.net/docs/design/design.html#SECTION00411000000000000000
-     * for more information.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_set_process_thread(jack_client_t*, JackThreadCallback, void*)</code>
+     * for more information. * NOTE: this function cannot be called while the
+     * client is activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_set_process_thread(jack_client_t*, JackThreadCallback, void*)</code>
      * <i>native declaration : jack/jack.h:257</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z23jack_set_process_threadP12_jack_client18JackThreadCallbackPv", "?jack_set_process_thread@@YAHPA12_jack_client18JackThreadCallbackPAX@Z"})
     int jack_set_process_thread(_jack_client client, JackThreadCallback thread_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell JACK to call @a thread_init_callback once just after
-     * the creation of the thread in which all other callbacks
-     * will be handled.
-     * * The code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code, causing JACK
-     * to remove that client from the process() graph.
-     * Original signature : <code>int jack_set_thread_init_callback(jack_client_t*, JackThreadInitCallback, void*)</code>
+     * Tell JACK to call @a thread_init_callback once just after the creation of
+     * the thread in which all other callbacks will be handled. * The code in
+     * the supplied function does not need to be suitable for real-time
+     * execution. * NOTE: this function cannot be called while the client is
+     * activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code, causing JACK to
+     * remove that client from the process() graph. Original signature :
+     * <code>int jack_set_thread_init_callback(jack_client_t*, JackThreadInitCallback, void*)</code>
      * <i>native declaration : jack/jack.h:273</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_thread_init_callbackP12_jack_client22JackThreadInitCallbackPv", "?jack_set_thread_init_callback@@YAHPA12_jack_client22JackThreadInitCallbackPAX@Z"})
     int jack_set_thread_init_callback(_jack_client client, JackThreadInitCallback thread_init_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the Jack server to call @a freewheel_callback
-     * whenever we enter or leave "freewheel" mode, passing @a
-     * arg as the second argument. The first argument to the
-     * callback will be non-zero if JACK is entering freewheel
-     * mode, and zero otherwise.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_set_freewheel_callback(jack_client_t*, JackFreewheelCallback, void*)</code>
+     * Tell the Jack server to call @a freewheel_callback whenever we enter or
+     * leave "freewheel" mode, passing @a arg as the second argument. The first
+     * argument to the callback will be non-zero if JACK is entering freewheel
+     * mode, and zero otherwise. * All "notification events" are received in a
+     * seperated non RT thread, the code in the supplied function does not need
+     * to be suitable for real-time execution. * NOTE: this function cannot be
+     * called while the client is activated (after jack_activate has been
+     * called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_set_freewheel_callback(jack_client_t*, JackFreewheelCallback, void*)</code>
      * <i>native declaration : jack/jack.h:293</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z27jack_set_freewheel_callbackP12_jack_client21JackFreewheelCallbackPv", "?jack_set_freewheel_callback@@YAHPA12_jack_client21JackFreewheelCallbackPAX@Z"})
     int jack_set_freewheel_callback(_jack_client client, JackFreewheelCallback freewheel_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Start/Stop JACK's "freewheel" mode.
-     * * When in "freewheel" mode, JACK no longer waits for
-     * any external event to begin the start of the next process
-     * cycle.
-     * * As a result, freewheel mode causes "faster than realtime"
-     * execution of a JACK graph. If possessed, real-time
-     * scheduling is dropped when entering freewheel mode, and
-     * if appropriate it is reacquired when stopping.
+     * Start/Stop JACK's "freewheel" mode. * When in "freewheel" mode, JACK no
+     * longer waits for any external event to begin the start of the next
+     * process cycle. * As a result, freewheel mode causes "faster than
+     * realtime" execution of a JACK graph. If possessed, real-time scheduling
+     * is dropped when entering freewheel mode, and if appropriate it is
+     * reacquired when stopping.
      *
-     * IMPORTANT: on systems using capabilities to provide real-time
-     * scheduling (i.e. Linux kernel 2.4), if onoff is zero, this function
-     * must be called from the thread that originally called jack_activate().
-     * This restriction does not apply to other systems (e.g. Linux kernel 2.6
-     * or OS X).
+     * IMPORTANT: on systems using capabilities to provide real-time scheduling
+     * (i.e. Linux kernel 2.4), if onoff is zero, this function must be called
+     * from the thread that originally called jack_activate(). This restriction
+     * does not apply to other systems (e.g. Linux kernel 2.6 or OS X).
      *
      * @param client pointer to JACK client structure
-     * @param onoff  if non-zero, freewheel mode starts. Otherwise
-     *                  freewheel mode ends.
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_set_freewheel(jack_client_t*, int)</code>
+     * @param onoff if non-zero, freewheel mode starts. Otherwise freewheel mode
+     * ends.
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature : <code>int jack_set_freewheel(jack_client_t*, int)</code>
      * <i>native declaration : jack/jack.h:321</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z18jack_set_freewheelP12_jack_clienti", "?jack_set_freewheel@@YAHPA12_jack_clientH@Z"})
     int jack_set_freewheel(_jack_client client, int onoff);
 
     /**
-     * Change the buffer size passed to the @a process_callback.
-     * * This operation stops the JACK engine process cycle, then calls all
-     * registered @a bufsize_callback functions before restarting the
-     * process cycle.  This will cause a gap in the audio flow, so it
-     * should only be done at appropriate stopping points.
+     * Change the buffer size passed to the @a process_callback. * This
+     * operation stops the JACK engine process cycle, then calls all registered
+     * @a bufsize_callback functions before restarting the process cycle. This
+     * will cause a gap in the audio flow, so it should only be done at
+     * appropriate stopping points.
+     *
      * * @see jack_set_buffer_size_callback()
      * * @param client pointer to JACK client structure.
-     * @param nframes new buffer size.  Must be a power of two.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_buffer_size(jack_client_t*, jack_nframes_t)</code>
+     * @param nframes new buffer size. Must be a power of two.
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_buffer_size(jack_client_t*, jack_nframes_t)</code>
      * <i>native declaration : jack/jack.h:338</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_set_buffer_sizeP12_jack_client8uint32_t", "?jack_set_buffer_size@@YAHPA12_jack_client8uint32_t@Z"})
     int jack_set_buffer_size(_jack_client client, int nframes);
 
     /**
-     * Tell JACK to call @a bufsize_callback whenever the size of the the
-     * buffer that will be passed to the @a process_callback is about to
-     * change.  Clients that depend on knowing the buffer size must supply
-     * a @a bufsize_callback before activating themselves.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
+     * Tell JACK to call @a bufsize_callback whenever the size of the the buffer
+     * that will be passed to the @a process_callback is about to change.
+     * Clients that depend on knowing the buffer size must supply a @a
+     * bufsize_callback before activating themselves. * All "notification
+     * events" are received in a seperated non RT thread, the code in the
+     * supplied function does not need to be suitable for real-time execution. *
+     * NOTE: this function cannot be called while the client is activated (after
+     * jack_activate has been called.)
+     *
      * * @param client pointer to JACK client structure.
      * @param bufsize_callback function to call when the buffer size changes.
      * @param arg argument for @a bufsize_callback.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_buffer_size_callback(jack_client_t*, JackBufferSizeCallback, void*)</code>
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_buffer_size_callback(jack_client_t*, JackBufferSizeCallback, void*)</code>
      * <i>native declaration : jack/jack.h:359</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_buffer_size_callbackP12_jack_client22JackBufferSizeCallbackPv", "?jack_set_buffer_size_callback@@YAHPA12_jack_client22JackBufferSizeCallbackPAX@Z"})
     int jack_set_buffer_size_callback(_jack_client client, JackBufferSizeCallback bufsize_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the Jack server to call @a srate_callback whenever the system
-     * sample rate changes.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_sample_rate_callback(jack_client_t*, JackSampleRateCallback, void*)</code>
+     * Tell the Jack server to call @a srate_callback whenever the system sample
+     * rate changes. * All "notification events" are received in a seperated non
+     * RT thread, the code in the supplied function does not need to be suitable
+     * for real-time execution. * NOTE: this function cannot be called while the
+     * client is activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_sample_rate_callback(jack_client_t*, JackSampleRateCallback, void*)</code>
      * <i>native declaration : jack/jack.h:376</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_sample_rate_callbackP12_jack_client22JackSampleRateCallbackPv", "?jack_set_sample_rate_callback@@YAHPA12_jack_client22JackSampleRateCallbackPAX@Z"})
     int jack_set_sample_rate_callback(_jack_client client, JackSampleRateCallback srate_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the JACK server to call @a registration_callback whenever a
-     * port is registered or unregistered, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_client_registration_callback(jack_client_t*, JackClientRegistrationCallback, void*)</code>
+     * Tell the JACK server to call @a registration_callback whenever a port is
+     * registered or unregistered, passing @a arg as a parameter. * All
+     * "notification events" are received in a seperated non RT thread, the code
+     * in the supplied function does not need to be suitable for real-time
+     * execution. * NOTE: this function cannot be called while the client is
+     * activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_client_registration_callback(jack_client_t*, JackClientRegistrationCallback, void*)</code>
      * <i>native declaration : jack/jack.h:393</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z37jack_set_client_registration_callbackP12_jack_client30JackClientRegistrationCallbackPv", "?jack_set_client_registration_callback@@YAHPA12_jack_client30JackClientRegistrationCallbackPAX@Z"})
     int jack_set_client_registration_callback(_jack_client jack_client_tPtr1, JackClientRegistrationCallback registration_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the JACK server to call @a registration_callback whenever a
-     * port is registered or unregistered, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_port_registration_callback(jack_client_t*, JackPortRegistrationCallback, void*)</code>
+     * Tell the JACK server to call @a registration_callback whenever a port is
+     * registered or unregistered, passing @a arg as a parameter. * All
+     * "notification events" are received in a seperated non RT thread, the code
+     * in the supplied function does not need to be suitable for real-time
+     * execution. * NOTE: this function cannot be called while the client is
+     * activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_port_registration_callback(jack_client_t*, JackPortRegistrationCallback, void*)</code>
      * <i>native declaration : jack/jack.h:410</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z35jack_set_port_registration_callbackP12_jack_client28JackPortRegistrationCallbackPv", "?jack_set_port_registration_callback@@YAHPA12_jack_client28JackPortRegistrationCallbackPAX@Z"})
     int jack_set_port_registration_callback(_jack_client jack_client_tPtr1, JackPortRegistrationCallback registration_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the JACK server to call @a connect_callback whenever a
-     * port is connected or disconnected, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_port_connect_callback(jack_client_t*, JackPortConnectCallback, void*)</code>
+     * Tell the JACK server to call @a connect_callback whenever a port is
+     * connected or disconnected, passing @a arg as a parameter. * All
+     * "notification events" are received in a seperated non RT thread, the code
+     * in the supplied function does not need to be suitable for real-time
+     * execution. * NOTE: this function cannot be called while the client is
+     * activated (after jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_port_connect_callback(jack_client_t*, JackPortConnectCallback, void*)</code>
      * <i>native declaration : jack/jack.h:427</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z30jack_set_port_connect_callbackP12_jack_client23JackPortConnectCallbackPv", "?jack_set_port_connect_callback@@YAHPA12_jack_client23JackPortConnectCallbackPAX@Z"})
     int jack_set_port_connect_callback(_jack_client jack_client_tPtr1, JackPortConnectCallback connect_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the JACK server to call @a rename_callback whenever a
-     * port is renamed, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_port_rename_callback(jack_client_t*, JackPortRenameCallback, void*)</code>
+     * Tell the JACK server to call @a rename_callback whenever a port is
+     * renamed, passing @a arg as a parameter. * All "notification events" are
+     * received in a seperated non RT thread, the code in the supplied function
+     * does not need to be suitable for real-time execution. * NOTE: this
+     * function cannot be called while the client is activated (after
+     * jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_port_rename_callback(jack_client_t*, JackPortRenameCallback, void*)</code>
      * <i>native declaration : jack/jack.h:444</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_port_rename_callbackP12_jack_client22JackPortRenameCallbackPv", "?jack_set_port_rename_callback@@YAHPA12_jack_client22JackPortRenameCallbackPAX@Z"})
 //    int jack_set_port_rename_callback(_jack_client jack_client_tPtr1, JackPortRenameCallback rename_callback, com.sun.jna.Pointer arg);
-
     /**
-     * Tell the JACK server to call @a graph_callback whenever the
-     * processing graph is reordered, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_graph_order_callback(jack_client_t*, JackGraphOrderCallback, void*)</code>
+     * Tell the JACK server to call @a graph_callback whenever the processing
+     * graph is reordered, passing @a arg as a parameter. * All "notification
+     * events" are received in a seperated non RT thread, the code in the
+     * supplied function does not need to be suitable for real-time execution. *
+     * NOTE: this function cannot be called while the client is activated (after
+     * jack_activate has been called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_graph_order_callback(jack_client_t*, JackGraphOrderCallback, void*)</code>
      * <i>native declaration : jack/jack.h:461</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_set_graph_order_callbackP12_jack_client22JackGraphOrderCallbackPv", "?jack_set_graph_order_callback@@YAHPA12_jack_client22JackGraphOrderCallbackPAX@Z"})
     int jack_set_graph_order_callback(_jack_client jack_client_tPtr1, JackGraphOrderCallback graph_callback, com.sun.jna.Pointer voidPtr1);
 
     /**
-     * Tell the JACK server to call @a xrun_callback whenever there is a
-     * xrun, passing @a arg as a parameter.
-     * * All "notification events" are received in a seperated non RT thread,
-     * the code in the supplied function does not need to be
-     * suitable for real-time execution.
-     * * NOTE: this function cannot be called while the client is activated
-     * (after jack_activate has been called.)
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_set_xrun_callback(jack_client_t*, JackXRunCallback, void*)</code>
+     * Tell the JACK server to call @a xrun_callback whenever there is a xrun,
+     * passing @a arg as a parameter. * All "notification events" are received
+     * in a seperated non RT thread, the code in the supplied function does not
+     * need to be suitable for real-time execution. * NOTE: this function cannot
+     * be called while the client is activated (after jack_activate has been
+     * called.)
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_set_xrun_callback(jack_client_t*, JackXRunCallback, void*)</code>
      * <i>native declaration : jack/jack.h:478</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z22jack_set_xrun_callbackP12_jack_client16JackXRunCallbackPv", "?jack_set_xrun_callback@@YAHPA12_jack_client16JackXRunCallbackPAX@Z"})
     int jack_set_xrun_callback(_jack_client jack_client_tPtr1, JackXRunCallback xrun_callback, com.sun.jna.Pointer arg);
 
     /**
-     * Tell the Jack server that the program is ready to start processing
-     * audio.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_activate(jack_client_t*)</code>
+     * Tell the Jack server that the program is ready to start processing audio.
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_activate(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:487</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z13jack_activateP12_jack_client", "?jack_activate@@YAHPA12_jack_client@Z"})
     int jack_activate(_jack_client client);
 
     /**
-     * Tell the Jack server to remove this @a client from the process
-     * graph.  Also, disconnect all ports belonging to it, since inactive
-     * clients have no port connections.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_deactivate(jack_client_t*)</code>
+     * Tell the Jack server to remove this @a client from the process graph.
+     * Also, disconnect all ports belonging to it, since inactive clients have
+     * no port connections.
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_deactivate(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:496</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z15jack_deactivateP12_jack_client", "?jack_deactivate@@YAHPA12_jack_client@Z"})
     int jack_deactivate(_jack_client client);
 
     /**
-     * Create a new port for the client. This is an object used for moving
-     * data of any type in or out of the client.  Ports may be connected
-     * in various ways.
-     * * Each port has a short name.  The port's full name contains the name
-     * of the client concatenated with a colon (:) followed by its short
-     * name.  The jack_port_name_size() is the maximum length of this full
-     * name.  Exceeding that will cause the port registration to fail and
-     * return NULL.
-     * * All ports have a type, which may be any non-NULL and non-zero
-     * length string, passed as an argument.  Some port types are built
-     * into the JACK API, currently only JACK_DEFAULT_AUDIO_TYPE.
+     * Create a new port for the client. This is an object used for moving data
+     * of any type in or out of the client. Ports may be connected in various
+     * ways. * Each port has a short name. The port's full name contains the
+     * name of the client concatenated with a colon (:) followed by its short
+     * name. The jack_port_name_size() is the maximum length of this full name.
+     * Exceeding that will cause the port registration to fail and return NULL.
+     * * All ports have a type, which may be any non-NULL and non-zero length
+     * string, passed as an argument. Some port types are built into the JACK
+     * API, currently only JACK_DEFAULT_AUDIO_TYPE.
+     *
      * * @param client pointer to JACK client structure.
-     * @param port_name non-empty short name for the new port (not
-     * including the leading @a "client_name:").
-     * @param port_type port type name.  If longer than
-     * jack_port_type_size(), only that many characters are significant.
+     * @param port_name non-empty short name for the new port (not including the
+     * leading @a "client_name:").
+     * @param port_type port type name. If longer than jack_port_type_size(),
+     * only that many characters are significant.
      * @param flags @ref JackPortFlags bit mask.
      * @param buffer_size must be non-zero if this is not a built-in @a
-     * port_type.  Otherwise, it is ignored.
-     * * @return jack_port_t pointer on success, otherwise NULL.
-     * Original signature : <code>jack_port_t* jack_port_register(jack_client_t*, const char*, const char*, unsigned long, unsigned long)</code>
+     * port_type. Otherwise, it is ignored.
+     * * @return jack_port_t pointer on success, otherwise NULL. Original
+     * signature :
+     * <code>jack_port_t* jack_port_register(jack_client_t*, const char*, const char*, unsigned long, unsigned long)</code>
      * <i>native declaration : jack/jack.h:524</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z18jack_port_registerP12_jack_clientPKcPKcmm", "?jack_port_register@@YAPA10_jack_portPA12_jack_clientPADPADKK@Z"})
     _jack_port jack_port_register(_jack_client client, java.lang.String port_name, java.lang.String port_type, com.sun.jna.NativeLong flags, com.sun.jna.NativeLong buffer_size);
 
     /**
-     * Remove the port from the client, disconnecting any existing
-     * connections.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_port_unregister(jack_client_t*, jack_port_t*)</code>
+     * Remove the port from the client, disconnecting any existing connections.
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_port_unregister(jack_client_t*, jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:536</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_port_unregisterP12_jack_clientP10_jack_port", "?jack_port_unregister@@YAHPA12_jack_clientPA10_jack_port@Z"})
     int jack_port_unregister(_jack_client jack_client_tPtr1, _jack_port jack_port_tPtr1);
 
     /**
-     * This returns a pointer to the memory area associated with the
-     * specified port. For an output port, it will be a memory area
-     * that can be written to; for an input port, it will be an area
-     * containing the data from the port's connection(s), or
-     * zero-filled. if there are multiple inbound connections, the data
-     * will be mixed appropriately.
-     * * FOR OUTPUT PORTS ONLY : DEPRECATED in Jack 2.0 !!
-     * ---------------------------------------------------
-     * You may cache the value returned, but only between calls to
-     * your "blocksize" callback. For this reason alone, you should
-     * either never cache the return value or ensure you have
-     * a "blocksize" callback and be sure to invalidate the cached
-     * address from there.
+     * This returns a pointer to the memory area associated with the specified
+     * port. For an output port, it will be a memory area that can be written
+     * to; for an input port, it will be an area containing the data from the
+     * port's connection(s), or zero-filled. if there are multiple inbound
+     * connections, the data will be mixed appropriately. * FOR OUTPUT PORTS
+     * ONLY : DEPRECATED in Jack 2.0 !!
+     * --------------------------------------------------- You may cache the
+     * value returned, but only between calls to your "blocksize" callback. For
+     * this reason alone, you should either never cache the return value or
+     * ensure you have a "blocksize" callback and be sure to invalidate the
+     * cached address from there.
      *
-     * Caching output ports is DEPRECATED in Jack 2.0, due to some new optimization (like "pipelining").
-     * Port buffers have to be retrieved in each callback for proper functionning.
-     * Original signature : <code>void* jack_port_get_buffer(jack_port_t*)</code>
+     * Caching output ports is DEPRECATED in Jack 2.0, due to some new
+     * optimization (like "pipelining"). Port buffers have to be retrieved in
+     * each callback for proper functionning. Original signature :
+     * <code>void* jack_port_get_buffer(jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:557</i>
      */
     com.sun.jna.Pointer jack_port_get_buffer(_jack_port jack_port_tPtr1, int nframes);
 
     /**
-     * @return the full name of the jack_port_t (including the @a
-     * "client_name:" prefix).
-     * * @see jack_port_name_size().
-     * Original signature : <code>char* jack_port_name(const jack_port_t*)</code>
+     * @return the full name of the jack_port_t (including the @a "client_name:"
+     * prefix).
+     * * @see jack_port_name_size(). Original signature :
+     * <code>char* jack_port_name(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:565</i>
      */
 //    com.sun.jna.ptr.ByteByReference jack_port_name(_jack_port port);
@@ -1213,67 +1215,67 @@ public interface JackLibrary extends com.sun.jna.Library {
     /**
      * @return the short name of the jack_port_t (not including the @a
      * "client_name:" prefix).
-     * * @see jack_port_name_size().
-     * Original signature : <code>char* jack_port_short_name(const jack_port_t*)</code>
+     * * @see jack_port_name_size(). Original signature :
+     * <code>char* jack_port_short_name(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:573</i>
      */
     com.sun.jna.ptr.ByteByReference jack_port_short_name(_jack_port port);
 
     /**
-     * @return the @ref JackPortFlags of the jack_port_t.
-     * Original signature : <code>int jack_port_flags(const jack_port_t*)</code>
+     * @return the @ref JackPortFlags of the jack_port_t. Original signature :
+     * <code>int jack_port_flags(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:578</i>
      */
     int jack_port_flags(_jack_port port);
 
     /**
      * @return the @a port type, at most jack_port_type_size() characters
-     * including a final NULL.
-     * Original signature : <code>char* jack_port_type(const jack_port_t*)</code>
+     * including a final NULL. Original signature :
+     * <code>char* jack_port_type(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:584</i>
      */
     com.sun.jna.ptr.ByteByReference jack_port_type(_jack_port port);
 
     /**
-     * @return the @a port type id.
-     * Original signature : <code>jack_port_type_id_t jack_port_type_id(const jack_port_t*)</code>
+     * @return the @a port type id. Original signature :
+     * <code>jack_port_type_id_t jack_port_type_id(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:589</i>
      */
 //    int jack_port_type_id(_jack_port port);
-
     /**
-     * @return TRUE if the jack_port_t belongs to the jack_client_t.
-     * Original signature : <code>int jack_port_is_mine(const jack_client_t*, const jack_port_t*)</code>
+     * @return TRUE if the jack_port_t belongs to the jack_client_t. Original
+     * signature :
+     * <code>int jack_port_is_mine(const jack_client_t*, const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:594</i>
      */
     int jack_port_is_mine(_jack_client jack_client_tPtr1, _jack_port port);
 
     /**
      * @return number of connections to or from @a port.
-     * * @pre The calling client must own @a port.
-     * Original signature : <code>int jack_port_connected(const jack_port_t*)</code>
+     * * @pre The calling client must own @a port. Original signature :
+     * <code>int jack_port_connected(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:601</i>
      */
     int jack_port_connected(_jack_port port);
 
     /**
-     * @return TRUE if the locally-owned @a port is @b directly connected
-     * to the @a port_name.
-     * * @see jack_port_name_size()
-     * Original signature : <code>int jack_port_connected_to(const jack_port_t*, const char*)</code>
+     * @return TRUE if the locally-owned @a port is @b directly connected to the
+     * @a port_name.
+     * * @see jack_port_name_size() Original signature :
+     * <code>int jack_port_connected_to(const jack_port_t*, const char*)</code>
      * <i>native declaration : jack/jack.h:609</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z22jack_port_connected_toPK10_jack_portPKc", "?jack_port_connected_to@@YAHPA10_jack_portPAD@Z"})
     int jack_port_connected_to(_jack_port port, java.lang.String port_name);
 
     /**
-     * @return a null-terminated array of full port names to which the @a
-     * port is connected.  If none, returns NULL.
-     * * The caller is responsible for calling free(3) on any non-NULL
-     * returned value.
+     * @return a null-terminated array of full port names to which the @a port
+     * is connected. If none, returns NULL. * The caller is responsible for
+     * calling free(3) on any non-NULL returned value.
      * * @param port locally owned jack_port_t pointer.
-     * * @see jack_port_name_size(), jack_port_get_all_connections()
-     * Original signature : <code>char** jack_port_get_connections(const jack_port_t*)</code>
+     * * @see jack_port_name_size(), jack_port_get_all_connections() Original
+     * signature :
+     * <code>char** jack_port_get_connections(const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:623</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z25jack_port_get_connectionsPK10_jack_port", "?jack_port_get_connections@@YAPAPADPA10_jack_port@Z"})
@@ -1281,19 +1283,16 @@ public interface JackLibrary extends com.sun.jna.Library {
     Pointer jack_port_get_connections(_jack_port port);
 
     /**
-     * @return a null-terminated array of full port names to which the @a
-     * port is connected.  If none, returns NULL.
-     * * The caller is responsible for calling free(3) on any non-NULL
-     * returned value.
-     * * This differs from jack_port_get_connections() in two important
-     * respects:
-     * *     1) You may not call this function from code that is
-     *          executed in response to a JACK event. For example,
-     *          you cannot use it in a GraphReordered handler.
-     * *     2) You need not be the owner of the port to get information
-     *          about its connections.
-     * * @see jack_port_name_size()
-     * Original signature : <code>char** jack_port_get_all_connections(const jack_client_t*, const jack_port_t*)</code>
+     * @return a null-terminated array of full port names to which the @a port
+     * is connected. If none, returns NULL. * The caller is responsible for
+     * calling free(3) on any non-NULL returned value. * This differs from
+     * jack_port_get_connections() in two important respects: * 1) You may not
+     * call this function from code that is executed in response to a JACK
+     * event. For example, you cannot use it in a GraphReordered handler. * 2)
+     * You need not be the owner of the port to get information about its
+     * connections.
+     * * @see jack_port_name_size() Original signature :
+     * <code>char** jack_port_get_all_connections(const jack_client_t*, const jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:644</i>
      */
 //	// @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_port_get_all_connectionsPK12_jack_clientPK10_jack_port", "?jack_port_get_all_connections@@YAPAPADPA12_jack_clientPA10_jack_port@Z"})
@@ -1301,136 +1300,135 @@ public interface JackLibrary extends com.sun.jna.Library {
     Pointer jack_port_get_all_connections(_jack_client client, _jack_port port);
 
     /**
-     * A client may call this on a pair of its own ports to
-     * semi-permanently wire them together. This means that
-     * a client that wants to direct-wire an input port to
-     * an output port can call this and then no longer
-     * have to worry about moving data between them. Any data
-     * arriving at the input port will appear automatically
-     * at the output port.
-     * * The 'destination' port must be an output port. The 'source'
-     * port must be an input port. Both ports must belong to
-     * the same client. You cannot use this to tie ports between
-     * clients. That is what a connection is for.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_port_tie(jack_port_t*, jack_port_t*)</code>
+     * A client may call this on a pair of its own ports to semi-permanently
+     * wire them together. This means that a client that wants to direct-wire an
+     * input port to an output port can call this and then no longer have to
+     * worry about moving data between them. Any data arriving at the input port
+     * will appear automatically at the output port. * The 'destination' port
+     * must be an output port. The 'source' port must be an input port. Both
+     * ports must belong to the same client. You cannot use this to tie ports
+     * between clients. That is what a connection is for.
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_port_tie(jack_port_t*, jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:663</i>
      */
     int jack_port_tie(_jack_port src, _jack_port dst);
 
     /**
-     * This undoes the effect of jack_port_tie(). The port
-     * should be same as the 'destination' port passed to
-     * jack_port_tie().
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_port_untie(jack_port_t*)</code>
+     * This undoes the effect of jack_port_tie(). The port should be same as the
+     * 'destination' port passed to jack_port_tie().
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_port_untie(jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:672</i>
      */
     int jack_port_untie(_jack_port port);
 
     /**
-     * @return the time (in frames) between data being available or
-     * delivered at/to a port, and the time at which it arrived at or is
-     * delivered to the "other side" of the port.  E.g. for a physical
-     * audio output port, this is the time between writing to the port and
-     * when the signal will leave the connector.  For a physical audio
-     * input port, this is the time between the sound arriving at the
-     * connector and the corresponding frames being readable from the
-     * port.
-     * Original signature : <code>jack_nframes_t jack_port_get_latency(jack_port_t*)</code>
+     * @return the time (in frames) between data being available or delivered
+     * at/to a port, and the time at which it arrived at or is delivered to the
+     * "other side" of the port. E.g. for a physical audio output port, this is
+     * the time between writing to the port and when the signal will leave the
+     * connector. For a physical audio input port, this is the time between the
+     * sound arriving at the connector and the corresponding frames being
+     * readable from the port. Original signature :
+     * <code>jack_nframes_t jack_port_get_latency(jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:684</i>
      */
     int jack_port_get_latency(_jack_port port);
 
     /**
-     * The maximum of the sum of the latencies in every
-     * connection path that can be drawn between the port and other
-     * ports with the @ref JackPortIsTerminal flag set.
-     * Original signature : <code>jack_nframes_t jack_port_get_total_latency(jack_client_t*, jack_port_t*)</code>
+     * The maximum of the sum of the latencies in every connection path that can
+     * be drawn between the port and other ports with the @ref
+     * JackPortIsTerminal flag set. Original signature :
+     * <code>jack_nframes_t jack_port_get_total_latency(jack_client_t*, jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:691</i>
      */
     int jack_port_get_total_latency(_jack_client jack_client_tPtr1, _jack_port port);
 
     /**
-     * The port latency is zero by default. Clients that control
-     * physical hardware with non-zero latency should call this
-     * to set the latency to its correct value. Note that the value
-     * should include any systemic latency present "outside" the
-     * physical hardware controlled by the client. For example,
-     * for a client controlling a digital audio interface connected
-     * to an external digital converter, the latency setting should
-     * include both buffering by the audio interface *and* the converter.
-     * Original signature : <code>void jack_port_set_latency(jack_port_t*)</code>
+     * The port latency is zero by default. Clients that control physical
+     * hardware with non-zero latency should call this to set the latency to its
+     * correct value. Note that the value should include any systemic latency
+     * present "outside" the physical hardware controlled by the client. For
+     * example, for a client controlling a digital audio interface connected to
+     * an external digital converter, the latency setting should include both
+     * buffering by the audio interface *and* the converter. Original signature
+     * : <code>void jack_port_set_latency(jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:704</i>
      */
     void jack_port_set_latency(_jack_port jack_port_tPtr1);
 
     /**
-     * Request a complete recomputation of a port's total latency. This
-     * can be called by a client that has just changed the internal
-     * latency of its port using @function jack_port_set_latency
-     * and wants to ensure that all signal pathways in the graph
-     * are updated with respect to the values that will be returned
-     * by @function jack_port_get_total_latency.
+     * Request a complete recomputation of a port's total latency. This can be
+     * called by a client that has just changed the internal latency of its port
+     * using @function jack_port_set_latency and wants to ensure that all signal
+     * pathways in the graph are updated with respect to the values that will be
+     * returned by @function jack_port_get_total_latency.
      *
-     * @return zero for successful execution of the request. non-zero
-     *         otherwise.
-     * Original signature : <code>int jack_recompute_total_latency(jack_client_t*, jack_port_t*)</code>
+     * @return zero for successful execution of the request. non-zero otherwise.
+     * Original signature :
+     * <code>int jack_recompute_total_latency(jack_client_t*, jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:717</i>
      */
     int jack_recompute_total_latency(_jack_client jack_client_tPtr1, _jack_port port);
 
     /**
-     * Request a complete recomputation of all port latencies. This
-     * can be called by a client that has just changed the internal
-     * latency of its port using @function jack_port_set_latency
-     * and wants to ensure that all signal pathways in the graph
-     * are updated with respect to the values that will be returned
-     * by @function jack_port_get_total_latency. It allows a client
-     * to change multiple port latencies without triggering a
-     * recompute for each change.
+     * Request a complete recomputation of all port latencies. This can be
+     * called by a client that has just changed the internal latency of its port
+     * using @function jack_port_set_latency and wants to ensure that all signal
+     * pathways in the graph are updated with respect to the values that will be
+     * returned by @function jack_port_get_total_latency. It allows a client to
+     * change multiple port latencies without triggering a recompute for each
+     * change.
      *
-     * @return zero for successful execution of the request. non-zero
-     *         otherwise.
-     * Original signature : <code>int jack_recompute_total_latencies(jack_client_t*)</code>
+     * @return zero for successful execution of the request. non-zero otherwise.
+     * Original signature :
+     * <code>int jack_recompute_total_latencies(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:732</i>
      */
     int jack_recompute_total_latencies(_jack_client jack_client_tPtr1);
 
     /**
-     * Modify a port's short name.  May be called at any time.  If the
-     * resulting full name (including the @a "client_name:" prefix) is
-     * longer than jack_port_name_size(), it will be truncated.
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_port_set_name(jack_port_t*, const char*)</code>
+     * Modify a port's short name. May be called at any time. If the resulting
+     * full name (including the @a "client_name:" prefix) is longer than
+     * jack_port_name_size(), it will be truncated.
+     *
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_port_set_name(jack_port_t*, const char*)</code>
      * <i>native declaration : jack/jack.h:741</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z18jack_port_set_nameP10_jack_portPKc", "?jack_port_set_name@@YAHPA10_jack_portPAD@Z"})
     int jack_port_set_name(_jack_port port, java.lang.String port_name);
 
     /**
-     * Set @a alias as an alias for @a port.  May be called at any time.
-     * If the alias is longer than jack_port_name_size(), it will be truncated.
+     * Set @a alias as an alias for @a port. May be called at any time. If the
+     * alias is longer than jack_port_name_size(), it will be truncated.
      *
      * After a successful call, and until JACK exits or
-     * @function jack_port_unset_alias() is called, @alias may be
-     * used as a alternate name for the port.
-     * * Ports can have up to two aliases - if both are already
-     * set, this function will return an error.
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_port_set_alias(jack_port_t*, const char*)</code>
+     *
+     * @function jack_port_unset_alias() is called, @alias may be used as a
+     * alternate name for the port. * Ports can have up to two aliases - if both
+     * are already set, this function will return an error.
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_port_set_alias(jack_port_t*, const char*)</code>
      * <i>native declaration : jack/jack.h:756</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z19jack_port_set_aliasP10_jack_portPKc", "?jack_port_set_alias@@YAHPA10_jack_portPAD@Z"})
     int jack_port_set_alias(_jack_port port, java.lang.String alias);
 
     /**
-     * Remove @a alias as an alias for @a port.  May be called at any time.
+     * Remove @a alias as an alias for @a port. May be called at any time.
      *
-     * After a successful call, @a alias can no longer be
-     * used as a alternate name for the port.
-     * * @return 0 on success, otherwise a non-zero error code.
-     * Original signature : <code>int jack_port_unset_alias(jack_port_t*, const char*)</code>
+     * After a successful call, @a alias can no longer be used as a alternate
+     * name for the port.
+     *
+     * * @return 0 on success, otherwise a non-zero error code. Original
+     * signature :
+     * <code>int jack_port_unset_alias(jack_port_t*, const char*)</code>
      * <i>native declaration : jack/jack.h:766</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z21jack_port_unset_aliasP10_jack_portPKc", "?jack_port_unset_alias@@YAHPA10_jack_portPAD@Z"})
@@ -1438,61 +1436,65 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * Get any aliases known for @port.
-     * * @return the number of aliases discovered for the port
-     * Original signature : <code>int jack_port_get_aliases(const jack_port_t*, char*[2])</code>
+     *
+     * * @return the number of aliases discovered for the port Original
+     * signature :
+     * <code>int jack_port_get_aliases(const jack_port_t*, char*[2])</code>
      * <i>native declaration : jack/jack.h:773</i>
      */
 //    int jack_port_get_aliases(_jack_port port, java.nio.ByteBuffer aliases[]);
-
     /**
-     * If @ref JackPortCanMonitor is set for this @a port, turn input
-     * monitoring on or off.  Otherwise, do nothing.
-     * Original signature : <code>int jack_port_request_monitor(jack_port_t*, int)</code>
+     * If @ref JackPortCanMonitor is set for this @a port, turn input monitoring
+     * on or off. Otherwise, do nothing. Original signature :
+     * <code>int jack_port_request_monitor(jack_port_t*, int)</code>
      * <i>native declaration : jack/jack.h:779</i>
      */
     int jack_port_request_monitor(_jack_port port, int onoff);
 
     /**
      * If @ref JackPortCanMonitor is set for this @a port_name, turn input
-     * monitoring on or off.  Otherwise, do nothing.
+     * monitoring on or off. Otherwise, do nothing.
+     *
      * * @return 0 on success, otherwise a non-zero error code.
-     * * @see jack_port_name_size()
-     * Original signature : <code>int jack_port_request_monitor_by_name(jack_client_t*, const char*, int)</code>
+     * * @see jack_port_name_size() Original signature :
+     * <code>int jack_port_request_monitor_by_name(jack_client_t*, const char*, int)</code>
      * <i>native declaration : jack/jack.h:789</i>
      */
     int jack_port_request_monitor_by_name(_jack_client client, java.lang.String port_name, int onoff);
 
     /**
-     * If @ref JackPortCanMonitor is set for a port, this function turns
-     * on input monitoring if it was off, and turns it off if only one
-     * request has been made to turn it on.  Otherwise it does nothing.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_port_ensure_monitor(jack_port_t*, int)</code>
+     * If @ref JackPortCanMonitor is set for a port, this function turns on
+     * input monitoring if it was off, and turns it off if only one request has
+     * been made to turn it on. Otherwise it does nothing.
+     *
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature : <code>int jack_port_ensure_monitor(jack_port_t*, int)</code>
      * <i>native declaration : jack/jack.h:799</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z24jack_port_ensure_monitorP10_jack_porti", "?jack_port_ensure_monitor@@YAHPA10_jack_portH@Z"})
     int jack_port_ensure_monitor(_jack_port port, int onoff);
 
     /**
-     * @return TRUE if input monitoring has been requested for @a port.
-     * Original signature : <code>int jack_port_monitoring_input(jack_port_t*)</code>
+     * @return TRUE if input monitoring has been requested for @a port. Original
+     * signature : <code>int jack_port_monitoring_input(jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:804</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z26jack_port_monitoring_inputP10_jack_port", "?jack_port_monitoring_input@@YAHPA10_jack_port@Z"})
     int jack_port_monitoring_input(_jack_port port);
 
     /**
-     * Establish a connection between two ports.
-     * * When a connection exists, data written to the source port will
-     * be available to be read at the destination port.
+     * Establish a connection between two ports. * When a connection exists,
+     * data written to the source port will be available to be read at the
+     * destination port.
+     *
      * * @pre The port types must be identical.
      * * @pre The @ref JackPortFlags of the @a source_port must include @ref
      * JackPortIsOutput.
      * * @pre The @ref JackPortFlags of the @a destination_port must include
      * @ref JackPortIsInput.
      * * @return 0 on success, EEXIST if the connection is already made,
-     * otherwise a non-zero error code
-     * Original signature : <code>int jack_connect(jack_client_t*, const char*, const char*)</code>
+     * otherwise a non-zero error code Original signature :
+     * <code>int jack_connect(jack_client_t*, const char*, const char*)</code>
      * <i>native declaration : jack/jack.h:823</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z12jack_connectP12_jack_clientPKcPKc", "?jack_connect@@YAHPA12_jack_clientPADPAD@Z"})
@@ -1500,26 +1502,27 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * Remove a connection between two ports.
+     *
      * * @pre The port types must be identical.
      * * @pre The @ref JackPortFlags of the @a source_port must include @ref
      * JackPortIsOutput.
      * * @pre The @ref JackPortFlags of the @a destination_port must include
      * @ref JackPortIsInput.
-     * * @return 0 on success, otherwise a non-zero error code
-     * Original signature : <code>int jack_disconnect(jack_client_t*, const char*, const char*)</code>
+     * * @return 0 on success, otherwise a non-zero error code Original
+     * signature :
+     * <code>int jack_disconnect(jack_client_t*, const char*, const char*)</code>
      * <i>native declaration : jack/jack.h:840</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z15jack_disconnectP12_jack_clientPKcPKc", "?jack_disconnect@@YAHPA12_jack_clientPADPAD@Z"})
     int jack_disconnect(_jack_client jack_client_tPtr1, java.lang.String source_port, java.lang.String destination_port);
 
     /**
-     * Perform the same function as jack_disconnect() using port handles
-     * rather than names.  This avoids the name lookup inherent in the
-     * name-based version.
-     * * Clients connecting their own ports are likely to use this function,
-     * while generic connection clients (e.g. patchbays) would use
-     * jack_disconnect().
-     * Original signature : <code>int jack_port_disconnect(jack_client_t*, jack_port_t*)</code>
+     * Perform the same function as jack_disconnect() using port handles rather
+     * than names. This avoids the name lookup inherent in the name-based
+     * version. * Clients connecting their own ports are likely to use this
+     * function, while generic connection clients (e.g. patchbays) would use
+     * jack_disconnect(). Original signature :
+     * <code>int jack_port_disconnect(jack_client_t*, jack_port_t*)</code>
      * <i>native declaration : jack/jack.h:853</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_port_disconnectP12_jack_clientP10_jack_port", "?jack_port_disconnect@@YAHPA12_jack_clientPA10_jack_port@Z"})
@@ -1527,11 +1530,10 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * @return the maximum number of characters in a full JACK port name
-     * including the final NULL character.  This value is a constant.
-     * * A port's full name contains the owning client name concatenated
-     * with a colon (:) followed by its short name and a NULL
-     * character.
-     * Original signature : <code>int jack_port_name_size()</code>
+     * including the final NULL character. This value is a constant. * A port's
+     * full name contains the owning client name concatenated with a colon (:)
+     * followed by its short name and a NULL character. Original signature :
+     * <code>int jack_port_name_size()</code>
      * <i>native declaration : jack/jack.h:863</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z19jack_port_name_sizev", "?jack_port_name_size@@YAHXZ"})
@@ -1539,17 +1541,17 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * @return the maximum number of characters in a JACK port type name
-     * including the final NULL character.  This value is a constant.
-     * Original signature : <code>int jack_port_type_size()</code>
+     * including the final NULL character. This value is a constant. Original
+     * signature : <code>int jack_port_type_size()</code>
      * <i>native declaration : jack/jack.h:869</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z19jack_port_type_sizev", "?jack_port_type_size@@YAHXZ"})
     int jack_port_type_size();
 
     /**
-     * @return the sample rate of the jack system, as set by the user when
-     * jackd was started.
-     * Original signature : <code>jack_nframes_t jack_get_sample_rate(jack_client_t*)</code>
+     * @return the sample rate of the jack system, as set by the user when jackd
+     * was started. Original signature :
+     * <code>jack_nframes_t jack_get_sample_rate(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:875</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_get_sample_rateP12_jack_client", "?jack_get_sample_rate@@YA8uint32_tPA12_jack_client@Z"})
@@ -1557,31 +1559,30 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * @return the current maximum size that will ever be passed to the @a
-     * process_callback.  It should only be used *before* the client has
-     * been activated.  This size may change, clients that depend on it
-     * must register a @a bufsize_callback so they will be notified if it
-     * does.
-     * * @see jack_set_buffer_size_callback()
-     * Original signature : <code>jack_nframes_t jack_get_buffer_size(jack_client_t*)</code>
+     * process_callback. It should only be used *before* the client has been
+     * activated. This size may change, clients that depend on it must register
+     * a @a bufsize_callback so they will be notified if it does.
+     * * @see jack_set_buffer_size_callback() Original signature :
+     * <code>jack_nframes_t jack_get_buffer_size(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:886</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z20jack_get_buffer_sizeP12_jack_client", "?jack_get_buffer_size@@YA8uint32_tPA12_jack_client@Z"})
     int jack_get_buffer_size(_jack_client jack_client_tPtr1);
 
     /**
-     * @param port_name_pattern A regular expression used to select
-     * ports by name.  If NULL or of zero length, no selection based
-     * on name will be carried out.
-     * @param type_name_pattern A regular expression used to select
-     * ports by type.  If NULL or of zero length, no selection based
-     * on type will be carried out.
-     * @param flags A value used to select ports by their flags.
-     * If zero, no selection based on flags will be carried out.
+     * @param port_name_pattern A regular expression used to select ports by
+     * name. If NULL or of zero length, no selection based on name will be
+     * carried out.
+     * @param type_name_pattern A regular expression used to select ports by
+     * type. If NULL or of zero length, no selection based on type will be
+     * carried out.
+     * @param flags A value used to select ports by their flags. If zero, no
+     * selection based on flags will be carried out.
      * * @return a NULL-terminated array of ports that match the specified
-     * arguments.  The caller is responsible for calling free(3) any
-     * non-NULL returned value.
-     * * @see jack_port_name_size(), jack_port_type_size()
-     * Original signature : <code>char** jack_get_ports(jack_client_t*, const char*, const char*, unsigned long)</code>
+     * arguments. The caller is responsible for calling free(3) any non-NULL
+     * returned value.
+     * * @see jack_port_name_size(), jack_port_type_size() Original signature :
+     * <code>char** jack_get_ports(jack_client_t*, const char*, const char*, unsigned long)</code>
      * <i>native declaration : jack/jack.h:904</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z14jack_get_portsP12_jack_clientPKcPKcm", "?jack_get_ports@@YAPAPADPA12_jack_clientPADPADK@Z"})
@@ -1590,45 +1591,45 @@ public interface JackLibrary extends com.sun.jna.Library {
 
     /**
      * @return address of the jack_port_t named @a port_name.
-     * * @see jack_port_name_size()
-     * Original signature : <code>jack_port_t* jack_port_by_name(jack_client_t*, const char*)</code>
+     * * @see jack_port_name_size() Original signature :
+     * <code>jack_port_t* jack_port_by_name(jack_client_t*, const char*)</code>
      * <i>native declaration : jack/jack.h:914</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z17jack_port_by_nameP12_jack_clientPKc", "?jack_port_by_name@@YAPA10_jack_portPA12_jack_clientPAD@Z"})
     _jack_port jack_port_by_name(_jack_client jack_client_tPtr1, java.lang.String port_name);
 
     /**
-     * @return address of the jack_port_t of a @a port_id.
-     * Original signature : <code>jack_port_t* jack_port_by_id(jack_client_t*, jack_port_id_t)</code>
+     * @return address of the jack_port_t of a @a port_id. Original signature :
+     * <code>jack_port_t* jack_port_by_id(jack_client_t*, jack_port_id_t)</code>
      * <i>native declaration : jack/jack.h:919</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z15jack_port_by_idP12_jack_client8uint32_t", "?jack_port_by_id@@YAPA10_jack_portPA12_jack_client8uint32_t@Z"})
     _jack_port jack_port_by_id(_jack_client client, int port_id);
 
     /**
-     * @return the time in frames that has passed since the JACK server
-     * began the current process cycle.
-     * Original signature : <code>jack_nframes_t jack_frames_since_cycle_start(const jack_client_t*)</code>
+     * @return the time in frames that has passed since the JACK server began
+     * the current process cycle. Original signature :
+     * <code>jack_nframes_t jack_frames_since_cycle_start(const jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:938</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z29jack_frames_since_cycle_startPK12_jack_client", "?jack_frames_since_cycle_start@@YA8uint32_tPA12_jack_client@Z"})
     int jack_frames_since_cycle_start(_jack_client jack_client_tPtr1);
 
     /**
-     * @return an estimate of the current time in frames.  This is a
-     * running counter, no significance should be attached to its value,
-     * but it can be compared to a previously returned value.
-     * Original signature : <code>jack_nframes_t jack_frame_time(const jack_client_t*)</code>
+     * @return an estimate of the current time in frames. This is a running
+     * counter, no significance should be attached to its value, but it can be
+     * compared to a previously returned value. Original signature :
+     * <code>jack_nframes_t jack_frame_time(const jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:945</i>
      */
     int jack_frame_time(_jack_client jack_client_tPtr1);
 
     /**
-     * @return the frame_time after the last processing of the graph
-     * this is only to be used from the process callback.
-     * * This function can be used to put timestamps generated by
-     * jack_frame_time() in correlation to the current process cycle.
-     * Original signature : <code>jack_nframes_t jack_last_frame_time(const jack_client_t*)</code>
+     * @return the frame_time after the last processing of the graph this is
+     * only to be used from the process callback. * This function can be used to
+     * put timestamps generated by jack_frame_time() in correlation to the
+     * current process cycle. Original signature :
+     * <code>jack_nframes_t jack_last_frame_time(const jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:954</i>
      */
     int jack_last_frame_time(_jack_client client);
@@ -1638,8 +1639,9 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Conversion Error : _jack_time_t
      */
     /**
-     * @return estimated time in frames for the specified system time.
-     * Original signature : <code>jack_nframes_t jack_time_to_frames(const jack_client_t*)</code>
+     * @return estimated time in frames for the specified system time. Original
+     * signature :
+     * <code>jack_nframes_t jack_time_to_frames(const jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:964</i>
      */
     int jack_time_to_frames(_jack_client client);
@@ -1649,11 +1651,11 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Conversion Error : _jack_time_t
      */
     /**
-     * @return the current CPU load estimated by JACK.  This is a running
-     * average of the time it takes to execute a full process cycle for
-     * all clients as a percentage of the real time available per cycle
-     * determined by the buffer size and sample rate.
-     * Original signature : <code>float jack_cpu_load(jack_client_t*)</code>
+     * @return the current CPU load estimated by JACK. This is a running average
+     * of the time it takes to execute a full process cycle for all clients as a
+     * percentage of the real time available per cycle determined by the buffer
+     * size and sample rate. Original signature :
+     * <code>float jack_cpu_load(jack_client_t*)</code>
      * <i>native declaration : jack/jack.h:982</i>
      */
     // @com.ochafik.lang.jnaerator.Mangling({"_Z13jack_cpu_loadP12_jack_client", "?jack_cpu_load@@YAMPA12_jack_client@Z"})
@@ -1664,10 +1666,10 @@ public interface JackLibrary extends com.sun.jna.Library {
      * Conversion Error : pthread_t
      */
     /**
-     * Set the @ref jack_error_callback for error message display.
-     * * The JACK library provides two built-in callbacks for this purpose:
-     * default_jack_error_callback() and silent_jack_error_callback().
-     * Original signature : <code>void jack_set_error_function(func)</code>
+     * Set the @ref jack_error_callback for error message display. * The JACK
+     * library provides two built-in callbacks for this purpose:
+     * default_jack_error_callback() and silent_jack_error_callback(). Original
+     * signature : <code>void jack_set_error_function(func)</code>
      * <i>native declaration : jack/jack.h:1006</i>
      *
      * @param arg1
@@ -1675,8 +1677,8 @@ public interface JackLibrary extends com.sun.jna.Library {
     void jack_set_error_function(func arg1);
 
     /**
-     * Set the @ref jack_info_callback for info message display.
-     * Original signature : <code>void jack_set_info_function(func)</code>
+     * Set the @ref jack_info_callback for info message display. Original
+     * signature : <code>void jack_set_info_function(func)</code>
      * <i>native declaration : jack/jack.h:1021</i>
      *
      * @param arg1
@@ -1684,8 +1686,8 @@ public interface JackLibrary extends com.sun.jna.Library {
     void jack_set_info_function(func arg1);
 
     /**
-     * @return return JACK's current system time in microseconds,
-     *         using JACK clock source.
+     * @return return JACK's current system time in microseconds, using JACK
+     * clock source.
      *
      * The value returned is guaranteed to be monotonic, but not linear.
      *
@@ -1717,4 +1719,45 @@ public interface JackLibrary extends com.sun.jna.Library {
 
 //    void free(Pointer ptr);
     void jack_free(Pointer ptr);
+
+     // MIDI functions //////////////////////////////////////////////////////////
+    public static class jack_midi_event_t extends Structure {
+
+        public int time;
+        public size_t size;
+        public Pointer buffer;
+
+        @Override
+        protected List getFieldOrder() {
+            return Arrays.asList(new String[]{"time", "size", "buffer"});
+        }
+    }
+
+    public static class size_t extends IntegerType {
+
+        public size_t() {
+            this(0);
+        }
+
+        public size_t(long value) {
+            super(Native.SIZE_T_SIZE, value);
+        }
+    }
+
+    void jack_midi_clear_buffer(Pointer port_buffer);
+
+    int jack_midi_event_get(jack_midi_event_t event, Pointer port_buffer, int event_index);
+
+    Pointer jack_midi_event_reserve(Pointer port_buffer, int time, int data_size);
+
+    int jack_midi_event_write(Pointer port_buffer, int time, Pointer data, int data_size);
+
+    int jack_midi_event_write(Pointer port_buffer, int time, byte[] data, int data_size);
+
+    int jack_midi_get_event_count(Pointer port_buffer);
+
+    int jack_midi_get_lost_event_count(Pointer port_buffer);
+
+    int jack_midi_max_event_size(Pointer port_buffer);
+
 }

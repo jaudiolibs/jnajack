@@ -164,4 +164,23 @@ public class JackLibraryDirect implements JackLibrary {
 
 //    public native void free(Pointer ptr);
     public native void jack_free(Pointer ptr);
+    
+    // MIDI functions //////////////////////////////////////////////////////////
+
+    public native void jack_midi_clear_buffer(Pointer port_buffer);
+    
+    public native int jack_midi_event_get(jack_midi_event_t event, Pointer port_buffer, int event_index);
+
+    public native Pointer jack_midi_event_reserve(Pointer port_buffer, int time, int data_size);
+
+    public native int jack_midi_event_write(Pointer port_buffer, int time, Pointer data, int data_size);
+    
+    public native int jack_midi_event_write(Pointer port_buffer, int time, byte[] data, int data_size);
+    
+    public native int jack_midi_get_event_count(Pointer port_buffer);
+    
+    public native int jack_midi_get_lost_event_count(Pointer port_buffer);
+    
+    public native int jack_midi_max_event_size(Pointer port_buffer);
+    
 }

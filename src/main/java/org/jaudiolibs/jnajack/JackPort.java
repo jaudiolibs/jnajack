@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith
+ * Copyright 2014 Neil C Smith
  * 
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,7 +25,6 @@
 package org.jaudiolibs.jnajack;
 
 import com.sun.jna.Pointer;
-import com.sun.jna.ptr.PointerByReference;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -40,20 +39,29 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
  * @author Neil C Smith
  */
 public class JackPort {
-
-    JackLibrary._jack_port portPtr;
-    Pointer buffer;
-    ByteBuffer byteBuffer;
-    FloatBuffer floatBuffer;
-    private JackClient client;
-    private String shortName;
+    
     private final static Logger LOG = Logger.getLogger(JackPort.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
 
-    JackPort(String shortName, JackClient client, JackLibrary._jack_port portPtr) {
+    final JackClient client;
+    final String shortName;
+    final JackPortType type;
+    final JackLibrary jackLib;
+    final JackLibrary._jack_port portPtr;
+    
+    Pointer bufferPtr;
+    ByteBuffer byteBuffer;
+    FloatBuffer floatBuffer;
+    
+    
+
+    JackPort(String shortName, JackClient client, JackPortType type,
+            JackLibrary._jack_port portPtr) {
         this.shortName = shortName;
-        this.portPtr = portPtr;
         this.client = client;
+        this.type = type;
+        this.portPtr = portPtr;
+        this.jackLib = client.jackLib;
     }
 
     /**
@@ -105,6 +113,16 @@ public class JackPort {
     }
 
     /**
+     * Get the type of this port.
+     *
+     * @return type
+     */
+    public JackPortType getType() {
+        return type;
+    }
+    
+    
+    /**
      * Returns the full names of the ports which are connected to this port. If
      * none, returns an empty array.
      *
@@ -114,7 +132,6 @@ public class JackPort {
      */
     public String[] getConnections() throws JackException {
         try {
-            JackLibrary jackLib = Jack.getInstance().jackLib;
             Pointer ptr = jackLib.jack_port_get_connections(portPtr);
             if (ptr == null) {
                 return new String[0];
@@ -127,5 +144,5 @@ public class JackPort {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
-    }
+    }    
 }

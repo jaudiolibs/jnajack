@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2014 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -38,7 +38,7 @@ public class JackPortType {
     public final static JackPortType AUDIO =
             new JackPortType(JackLibrary.JACK_DEFAULT_AUDIO_TYPE, 0);
     /**
-     * MIDI port. Not yet implemented in JNAJack.
+     * MIDI port.
      */
     public final static JackPortType MIDI =
             new JackPortType(JackLibrary.JACK_DEFAULT_MIDI_TYPE, 0);
