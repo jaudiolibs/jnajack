@@ -12,6 +12,7 @@ import org.jaudiolibs.jnajack.util.SimpleAudioClient;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class SineAudioSource implements SimpleAudioClient.Processor {
 
     private final static int TABLE_SIZE = 200;

@@ -8,6 +8,7 @@ import org.jaudiolibs.jnajack.util.SimpleAudioClient;
  *
  * @author Neil C Smith
  */
+@Deprecated
 public class NoiseAudioSource implements SimpleAudioClient.Processor {
 
     /**
