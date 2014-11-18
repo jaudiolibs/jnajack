@@ -55,7 +55,8 @@ public class JackClient {
     final Jack jack;
     final JackLibrary jackLib;
     final String name;
-    final JackLibrary._jack_client clientPtr; // package private
+    
+    JackLibrary._jack_client clientPtr; // package private
     
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private BufferSizeCallbackWrapper buffersizeCallback;
@@ -395,7 +396,7 @@ public class JackClient {
     /**
      * Disconnects this client from the JACK server.
      */
-    public void close() {
+    public synchronized void close() {
         try {
             if (clientPtr != null) {
                 jackLib.jack_client_close(clientPtr);
@@ -404,7 +405,7 @@ public class JackClient {
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
         } finally {
-//            clientPtr = null;
+            clientPtr = null;
         }
     }
 
@@ -453,11 +454,6 @@ public class JackClient {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        close();
-    }
 
     private class ProcessCallbackWrapper implements JackLibrary.JackProcessCallback {
 
