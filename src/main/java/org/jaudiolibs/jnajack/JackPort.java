@@ -144,5 +144,41 @@ public class JackPort {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
         }
-    }    
+    }
+
+    /**
+     * Fills the passed latency range structure with the current server
+     * information about min and max latency for this port.
+     * @param JackLatencyRange the output lantency range object to be filled
+     * @param JackLatencyCallbackMode the "mode" (playback or capture) the values are required for
+     */
+    public void getLatencyRange(JackLatencyRange latencyRange,
+            JackLatencyCallbackMode mode) throws JackException {
+        try {
+            jackLib.jack_port_get_latency_range(portPtr, mode.val,
+                    latencyRange.nativeRange);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Wraps the JNA native structure
+     */
+    public static class JackLatencyRange {
+        private final JackLibrary.jack_latency_range_t nativeRange;
+
+        public JackLatencyRange() {
+            this.nativeRange = new JackLibrary.jack_latency_range_t();
+        }
+
+        public int getMin() {
+            return nativeRange.min;
+        }
+
+        public int getMax() {
+            return nativeRange.max;
+        }
+    }
 }

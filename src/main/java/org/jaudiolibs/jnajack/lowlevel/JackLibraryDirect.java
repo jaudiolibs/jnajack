@@ -136,6 +136,8 @@ public class JackLibraryDirect implements JackLibrary {
 
     public native int jack_port_type_size();
 
+    public native void jack_port_get_latency_range( _jack_port port, int mode, jack_latency_range_t range );
+
     public native int jack_get_sample_rate(_jack_client jack_client_tPtr1);
 
     public native int jack_get_buffer_size(_jack_client jack_client_tPtr1);
