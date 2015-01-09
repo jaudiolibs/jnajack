@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2014 Neil C Smith
+ * Some methods copyright 2014 Daniel Hams
  * 
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -32,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
+import org.jaudiolibs.jnajack.util.NativeToJavaTypeConverter;
 
 /**
  * Wraps a native Jack port.

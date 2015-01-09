@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
+import org.jaudiolibs.jnajack.util.NativeToJavaTypeConverter;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -525,12 +526,12 @@ public class JackClient {
      * It provides the time at the start of the current processing cycle as
      * a count of the number of sample frames that have passed.
      *
-     * @return current processing period start time in frames
+     * @return current processing period start time in frames - native 32 bit unsigned int as long
      * @throws JackException
      */
-    public int getLastFrameTime() throws JackException {
+    public long getLastFrameTime() throws JackException {
         try {
-            return jackLib.jack_last_frame_time(clientPtr);
+            return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_last_frame_time(clientPtr));
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
@@ -543,12 +544,12 @@ public class JackClient {
      * callback to events happening outside in regular runtime classes
      * such as a GUI.
      *
-     * @return current estimated time in frames
+     * @return current estimated time in frames - native 32 bit unsigned int as long
      * @throws JackException
      */
-    public int getFrameTime() throws JackException {
+    public long getFrameTime() throws JackException {
         try {
-            return jackLib.jack_frame_time(clientPtr);
+            return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_frame_time(clientPtr));
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
@@ -561,7 +562,6 @@ public class JackClient {
             userShutdownCallback.clientShutdown(this);
         }
     }
-
 
     private class ProcessCallbackWrapper implements JackLibrary.JackProcessCallback {
 
