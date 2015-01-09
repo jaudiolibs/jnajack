@@ -165,7 +165,7 @@ public class JackClient {
             throws JackException {
         try {
             int ret = jackLib.jack_port_unregister(clientPtr, port.portPtr);
-            remotePortFromArray(port);
+            removePortFromArray(port);
             return ret;
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
@@ -173,7 +173,7 @@ public class JackClient {
         }
     }
 
-    private void remotePortFromArray(JackPort port) {
+    private void removePortFromArray(JackPort port) {
         JackPort[] pts = ports;
         List<JackPort> portList = new ArrayList<JackPort>(Arrays.asList(pts));
         portList.remove(port);
