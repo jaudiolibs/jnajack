@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
-import org.jaudiolibs.jnajack.util.NativeToJavaTypeConverter;
+import org.jaudiolibs.jnajack.NativeToJavaTypeConverter;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
