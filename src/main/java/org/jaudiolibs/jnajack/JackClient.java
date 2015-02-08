@@ -3,6 +3,7 @@
  *
  * Copyright 2014 Neil C Smith
  * Some methods copyright 2012 Chuck Ritola
+ * Some methods copyright 2014 Daniel Hams
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -33,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
+import org.jaudiolibs.jnajack.NativeToJavaTypeConverter;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -59,6 +61,7 @@ public class JackClient {
     JackLibrary._jack_client clientPtr; // package private
     
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
+    private XRunCallbackWrapper xrunCallback;
     private BufferSizeCallbackWrapper buffersizeCallback;
     private SampleRateCallbackWrapper samplerateCallback;
     private ClientRegistrationCallbackWrapper clientRegistrationCallback;
@@ -151,34 +154,101 @@ public class JackClient {
     }
 
     /**
+     * Remove a port registered for the client.
+     * <em>Once unregistered the port should not be used</em>.
+     *
+     * @param port The jack port to unregister
+     * @return int Jack integer return code indicating success
+     * @throws JackException
+     */
+    public int unregisterPort(JackPort port)
+            throws JackException {
+        try {
+            int ret = jackLib.jack_port_unregister(clientPtr, port.portPtr);
+            removePortFromArray(port);
+            return ret;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    private void removePortFromArray(JackPort port) {
+        JackPort[] pts = ports;
+        List<JackPort> portList = new ArrayList<JackPort>(Arrays.asList(pts));
+        portList.remove(port);
+        pts = portList.toArray(new JackPort[portList.size()]);
+        ports = pts;
+    }
+
+    /**
      * Tell the Jack server to call the JackProcessCallback whenever there is
      * work be done. The code in the supplied function must be suitable for
      * real-time execution. That means that it cannot call functions that might
      * block for a long time.
      *
      * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
     public void setProcessCallback(JackProcessCallback callback) throws JackException {
         if (callback == null) {
-            throw new NullPointerException();
-        }
-        ProcessCallbackWrapper wrapper = new ProcessCallbackWrapper(callback);
-        int ret = -1;
-        try {
-            ret = jackLib.jack_set_process_callback(clientPtr, wrapper, null);
-        } catch (Throwable e) {
-            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-            throw new JackException(e);
-        }
-        if (ret == 0) {
-            processCallback = wrapper;
+            try {
+                jackLib.jack_set_process_callback(clientPtr, null, null);
+                processCallback = null;
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+                throw new JackException(e);
+            }
         } else {
-            throw new JackException();
+            ProcessCallbackWrapper wrapper = new ProcessCallbackWrapper(callback);
+            int ret = -1;
+            try {
+                ret = jackLib.jack_set_process_callback(clientPtr, wrapper, null);
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+                throw new JackException(e);
+            }
+            if (ret == 0) {
+                processCallback = wrapper;
+            } else {
+                throw new JackException();
+            }
         }
-
     }
 
+    /**
+     * Tell the jack server to call the JackXrunCallback whenever there is
+     * an xrun reported by the Jack server.
+     *
+     * @param callback
+     * @throws JackException
+     *
+     */
+    public void setXrunCallback(JackXrunCallback callback) throws JackException {
+        if (callback == null) {
+            try {
+                jackLib.jack_set_xrun_callback(clientPtr, null, null);
+                xrunCallback = null;
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+                throw new JackException(e);
+            }
+        } else {
+            XRunCallbackWrapper wrapper = new XRunCallbackWrapper(callback);
+            int ret = -1;
+            try {
+                ret = jackLib.jack_set_xrun_callback(clientPtr, wrapper, null);
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+                throw new JackException(e);
+            }
+            if (ret == 0) {
+                xrunCallback = wrapper;
+            } else {
+                throw new JackException();
+            }
+        }
+    }
     /**
      * Tell the JACK server to call the supplied JackGraphOrderCallback whenever
      * the processing graph is reordered. * All "notification events" are
@@ -418,7 +488,7 @@ public class JackClient {
      * started.
      *
      * @return sample rate
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
     public int getSampleRate() throws JackException {
         try {
@@ -436,11 +506,50 @@ public class JackClient {
      * a JackBuffersizeCallback so they will be notified if it does.
      *
      * @return int maximum buffersize.
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
     public int getBufferSize() throws JackException {
         try {
             return jackLib.jack_get_buffer_size(clientPtr);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * This function may only be used within the process() callback.
+     * It provides the internal timing information that can be
+     * related to other timing related functions within Jack. It allows the
+     * caller to map between frame counts within the time warped jack callback
+     * and the "real world" outside of that.
+     * It provides the time at the start of the current processing cycle as
+     * a count of the number of sample frames that have passed.
+     *
+     * @return current processing period start time in frames - native 32 bit unsigned int as long
+     * @throws JackException
+     */
+    public long getLastFrameTime() throws JackException {
+        try {
+            return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_last_frame_time(clientPtr));
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Provides the estimated current time in frames.
+     * This can be used to relate events inside the Jack process()
+     * callback to events happening outside in regular runtime classes
+     * such as a GUI.
+     *
+     * @return current estimated time in frames - native 32 bit unsigned int as long
+     * @throws JackException
+     */
+    public long getFrameTime() throws JackException {
+        try {
+            return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_frame_time(clientPtr));
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
@@ -453,7 +562,6 @@ public class JackClient {
             userShutdownCallback.clientShutdown(this);
         }
     }
-
 
     private class ProcessCallbackWrapper implements JackLibrary.JackProcessCallback {
 
@@ -504,6 +612,28 @@ public class JackClient {
             if (ret != 0) {
                 jack.forceThreadDetach();
             }
+            return ret;
+        }
+    }
+
+    private class XRunCallbackWrapper implements JackLibrary.JackXRunCallback {
+        JackXrunCallback callback;
+
+        XRunCallbackWrapper(JackXrunCallback callback ) {
+            this.callback = callback;
+        }
+
+        @Override
+        public int invoke(Pointer arg)
+        {
+            int ret = -1;
+            try {
+                callback.xrunOccured(JackClient.this);
+            } catch (Throwable e ) {
+                LOG.log(Level.SEVERE, "Error in xrun callback", e );
+                ret = -1;
+            }
+
             return ret;
         }
     }

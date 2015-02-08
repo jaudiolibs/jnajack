@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright 2010 Neil C Smith.
+ * Some methods copyright 2014 Daniel Hams
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -1607,6 +1608,13 @@ public interface JackLibrary extends com.sun.jna.Library {
     _jack_port jack_port_by_id(_jack_client client, int port_id);
 
     /**
+     * @param port
+     * @param mode
+     * @param jack_latency_range_t output latency range structure
+     */
+    void jack_port_get_latency_range( _jack_port port, int mode, jack_latency_range_t range );
+
+    /**
      * @return the time in frames that has passed since the JACK server began
      * the current process cycle. Original signature :
      * <code>jack_nframes_t jack_frames_since_cycle_start(const jack_client_t*)</code>
@@ -1759,5 +1767,72 @@ public interface JackLibrary extends com.sun.jna.Library {
     int jack_midi_get_lost_event_count(Pointer port_buffer);
 
     int jack_midi_max_event_size(Pointer port_buffer);
+
+    // Latency range functions //////////////////////////////////////////////////
+    public static interface jack_latency_callback_mode {
+        public static final int JackCaptureLatency = 0;
+        public static final int JackPlaybackLatency = 1;
+    }
+
+    public static class jack_latency_range_t extends com.sun.jna.Structure {
+        /// Allocate a new jack_latency_range_t struct on the heap
+
+        public jack_latency_range_t() {
+        }
+
+        /// Cast data at given memory location (pointer + offset) as an
+        // existing jack_latency_range_t struct
+
+        public jack_latency_range_t(com.sun.jna.Pointer pointer, int offset) {
+            super();
+            useMemory(pointer, offset);
+            read();
+        }
+
+        /// Create an instance that shares its memory with another
+        // jack_latency_range_t instance
+
+        public jack_latency_range_t(jack_latency_range_t struct) {
+            this(struct.getPointer(), 0);
+        }
+
+        public static class ByReference extends jack_latency_range_t implements
+                com.sun.jna.Structure.ByReference {
+            /// Allocate a new jack_latency_range_t.ByRef struct on the heap
+
+            public ByReference() {
+            }
+
+            /// Create an instance that shares its memory with another
+            // jack_latency_range_t instance
+
+            public ByReference(jack_latency_range_t struct) {
+                super(struct.getPointer(), 0);
+            }
+        }
+
+        public static class ByValue extends jack_latency_range_t implements
+                com.sun.jna.Structure.ByValue {
+            /// Allocate a new jack_latency_range_t.ByVal struct on the heap
+
+            public ByValue() {
+            }
+
+            // / Create an instance that shares its memory with another
+            // jack_latency_range_t instance
+
+            public ByValue(jack_latency_range_t struct) {
+                super(struct.getPointer(), 0);
+            }
+        }
+
+        public int min;
+        public int max;
+
+        @Override
+        protected List getFieldOrder() {
+            return Arrays.asList(new String[] { "min", "max" });
+        }
+    }
 
 }
