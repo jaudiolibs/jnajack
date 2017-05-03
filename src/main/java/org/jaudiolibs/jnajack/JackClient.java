@@ -676,7 +676,6 @@ public class JackClient {
             this.callback = callback;
         }
 
-        @Override
         public void invoke(int a, int b, int connect, Pointer arg) {
             try {
                 _jack_port pA = jackLib.jack_port_by_id(clientPtr, a);
@@ -705,7 +704,6 @@ public class JackClient {
             this.callback = callback;
         }
 
-        @Override
         public void invoke(ByteByReference name, int register, Pointer arg) {
             try {
                 String nameString = name.getPointer().getString(0);
@@ -729,7 +727,6 @@ public class JackClient {
             this.callback = callback;
         }
 
-        @Override
         public void invoke(int port, int int1, Pointer arg) {
             try {
 
@@ -755,7 +752,6 @@ public class JackClient {
             this.callback = callback;
         }
 
-        @Override
         public int invoke(Pointer arg) {
             callback.graphOrderChanged(JackClient.this);
             return 0;
