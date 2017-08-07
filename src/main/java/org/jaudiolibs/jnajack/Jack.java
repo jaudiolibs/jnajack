@@ -426,11 +426,11 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * Query the server for the current transport state and position.  
+	 * Query the server for the current transport state and position.
 	 * 
-	 * @param client 
+	 * @param client
 	 * @param position The {@code JackTransport} object to populate
 	 * @return The current transport state (see {@link JackTransportStates})
 	 * @throws JackException
@@ -444,13 +444,13 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Reposition the transport to a new frame number.
 	 * 
 	 * @param client
 	 * @param frame
-	 * @return
+	 * @return 0 if valid request, non-zero otherwise.
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
@@ -462,9 +462,11 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Return an estimate of the current transport frame,
+	 * including any time elapsed since the last transport
+	 * positional update.
 	 * 
 	 * @param client
 	 * @return
@@ -479,13 +481,13 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Request a new transport position.
 	 * 
 	 * @param client
 	 * @param position
-	 * @return
+	 * @return 0 if valid request, non-zero if position structure rejected.
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
@@ -497,9 +499,9 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Start the JACK transport rolling.
 	 * 
 	 * @param client
 	 * @throws JackException
@@ -513,9 +515,9 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Stop the JACK transport.
 	 * 
 	 * @param client
 	 * @throws JackException
@@ -529,18 +531,19 @@ public class Jack {
 			throw new JackException(e);
 		}
 	}
-	
+
 	/**
-	 * 
+	 * Set the timeout value for slow-sync clients.
 	 * 
 	 * @param client
 	 * @param timeout
+	 * @return 0 on success, otherwise a non-zero error code.
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public void setSyncTimeout(JackClient client, long timeout) throws JackException {
+	public int setSyncTimeout(JackClient client, long timeout) throws JackException {
 		try {
-			jackLib.jack_set_sync_timeout(client.clientPtr, timeout);
+			return jackLib.jack_set_sync_timeout(client.clientPtr, timeout);
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);
