@@ -1882,16 +1882,25 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * If the timebase master releases the timebase or leaves the JACK graph for any reason, the JACK engine takes over
 	 * at the start of the next process cycle. The transport state does not change. If rolling, it continues to play,
 	 * with frame numbers as the only available position information.
+	 * <p>
+	 * signature :
+	 * <code>int  jack_release_timebase (jack_client_t *client)</code>
+	 * <i>native declaration : jack/transport.h:231</i>
 	 * 
 	 * @param client the JACK client structure.
 	 * @return 0 on success, otherwise a non-zero error code.
+	 * 
+	 * 
 	 */
 	int jack_release_timebase(_jack_client client);
 
 	/**
 	 * Return an estimate of the current transport frame, including any time elapsed since the last transport positional
 	 * update.
-	 * 
+	 * <p>
+	 * signature :
+	 * <code>jack_nframes_t jack_get_current_transport_frame (const jack_client_t *client)</code>
+	 * <i>native declaration : jack/transport.h:413</i>
 	 * @param client
 	 * @return
 	 */
@@ -1908,7 +1917,13 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * After that, it runs according to the ::JackSyncCallback rules.
 	 * Clients that don't set a @a sync_callback are assumed to be ready
 	 * immediately any time the transport wants to start.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>int  jack_set_sync_callback (jack_client_t *client,
+			     JackSyncCallback sync_callback,
+			     void *arg)</code>
+	 * <i>native declaration : jack/transport.h:74</i>
+	 * 
 	 * @param client the JACK client structure.
 	 * @param sync_callback is a realtime function that returns TRUE when
 	 *        the client is ready. Setting @a sync_callback to NULL declares that
@@ -1928,7 +1943,11 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * even if some slow-sync clients are still unready. The @a
 	 * sync_callbacks of these clients continue being invoked, giving them
 	 * a chance to catch up.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>int  jack_set_sync_timeout (jack_client_t *client,
+			    jack_time_t timeout)</code>
+	 * <i>native declaration : jack/transport.h:95</i>
 	 * @see jack_set_sync_callback
 	 *
 	 * @param client the JACK client structure.
@@ -1950,7 +1969,14 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * takes over, the former @a timebase_callback is no longer called.
 	 * Taking over the timebase may be done conditionally, so it fails if
 	 * there was a master already.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>int  jack_set_timebase_callback (jack_client_t *client,
+				 int conditional,
+				 JackTimebaseCallback timebase_callback,
+				 void *arg)</code>
+	 * <i>native declaration : jack/transport.h:123</i>
+	 * 
 	 * @param client the JACK client structure.
 	 * @param conditional non-zero for a conditional request.
 	 * @param timebase_callback is a realtime function that returns
@@ -1974,7 +2000,12 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * the transport is already rolling, it will enter the
 	 * ::JackTransportStarting state and begin invoking their @a
 	 * sync_callbacks until ready. This function is realtime-safe.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>int  jack_transport_locate (jack_client_t *client,
+			    jack_nframes_t frame)</code>
+	 * <i>native declaration : jack/transport.h:144</i>
+	 * 
 	 * @see jack_transport_reposition, jack_set_sync_callback
 	 *
 	 * @param client the JACK client structure.
@@ -1991,7 +2022,12 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * If called from the process thread, @a pos corresponds to the first
 	 * frame of the current cycle and the state returned is valid for the
 	 * entire cycle.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>jack_transport_state_t jack_transport_query (const jack_client_t *client,
+					     jack_position_t *pos)</code>
+	 * <i>native declaration : jack/transport.h:162</i>
+	 * 
 	 * @param client the JACK client structure.
 	 * @param pos pointer to structure for returning current transport
 	 *        position; @a pos->valid will show which fields contain valid data.
@@ -2010,6 +2046,12 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * ::JackTransportStarting state and begin invoking their @a
 	 * sync_callbacks until ready. This function is realtime-safe.
 	 *
+	 * <p>
+	 * signature :
+	 * <code>int  jack_transport_reposition (jack_client_t *client,
+				const jack_position_t *pos)</code>
+	 * <i>native declaration : jack/transport.h:190</i>
+	 * 
 	 * @see jack_transport_locate, jack_set_sync_callback
 	 *
 	 * @param client the JACK client structure.
@@ -2025,7 +2067,11 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 * Any client can make this request at any time. It takes effect no
 	 * sooner than the next process cycle, perhaps later if there are
 	 * slow-sync clients. This function is realtime-safe.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>void jack_transport_start (jack_client_t *client)</code>
+	 * <i>native declaration : jack/transport.h:204</i>
+	 * 
 	 * @see jack_set_sync_callback
 	 *
 	 * @param client the JACK client structure.
@@ -2037,7 +2083,11 @@ public interface JackLibrary extends com.sun.jna.Library {
 	 *
 	 * Any client can make this request at any time. It takes effect on
 	 * the next process cycle. This function is realtime-safe.
-	 *
+	 * <p>
+	 * signature :
+	 * <code>void jack_transport_stop (jack_client_t *client)</code>
+	 * <i>native declaration : jack/transport.h:214</i>
+	 * 
 	 * @param client the JACK client structure.
 	 */
 	void jack_transport_stop(_jack_client client);
