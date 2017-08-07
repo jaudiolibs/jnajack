@@ -191,7 +191,6 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 					position.addToBarStartTick(position.getBeatsPerBar() * position.getTicksPerBeat());
 				}
 			}
-
 		}
 
 	}
@@ -246,28 +245,24 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 				} catch (JackException e) {
 					System.err.println("Unable to activate client. ");
 				}
-
 			}
 		});
 		cmdMap.put("exit", new Command("exit", "Exit transport program") {
 			@Override
 			public void execute(String arg) {
 				done = true;
-
 			}
 		});
 		cmdMap.put("deactivate", new Command("deactivate", "Call jack_deactivate()") {
 			@Override
 			public void execute(String arg) {
 				client.deactivate();
-
 			}
 		});
 		cmdMap.put("help", new Command("help", "Display help text [<command>]") {
 			@Override
 			public void execute(String arg) {
-				// TODO Auto-generated method stub
-
+				displayHelp(arg);
 			}
 		});
 		cmdMap.put("locate", new Command("locate", "Locate to frame <position>") {
@@ -284,7 +279,6 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 				} catch (JackException e) {
 					System.err.println("Unable to execute locate: " + e.getMessage());
 				}
-
 			}
 		});
 		cmdMap.put("master", new Command("master", "Become timebase master [<conditionally>]") {
@@ -300,35 +294,30 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 				} catch (JackException e) {
 					System.err.println("Unable to become timebase master: " + e.getMessage());
 				}
-
 			}
 		});
 		cmdMap.put("play", new Command("play", "Start transport rolling") {
 			@Override
 			public void execute(String arg) {
 				transportPlay();
-
 			}
 		});
 		cmdMap.put("quit", new Command("quit", "Synonym for `exit'") {
 			@Override
 			public void execute(String arg) {
 				done = true;
-
 			}
 		});
 		cmdMap.put("release", new Command("release", "Release timebase") {
 			@Override
 			public void execute(String arg) {
 				client.releaseTimebase();
-
 			}
 		});
 		cmdMap.put("stop", new Command("stop", "Stop transport") {
 			@Override
 			public void execute(String arg) {
 				transportStop();
-
 			}
 		});
 		cmdMap.put("tempo", new Command("tempo", "Set beat tempo <beats_per_min>") {
@@ -340,7 +329,6 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 				}
 				bpm = tempo;
 				timeReset = true;
-
 			}
 		});
 		cmdMap.put("timeout", new Command("timeout", "Set sync timeout in <seconds>") {
@@ -385,7 +373,6 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 			@Override
 			public void execute(String arg) {
 				displayHelp(arg);
-
 			}
 		});
 		cmdMap.put("default", new Command("default", "") {
@@ -393,7 +380,6 @@ public class Transport implements JackShutdownCallback, JackTimebaseCallback {
 			public void execute(String arg) {
 				System.err.println("Unkown command " + arg);
 				displayHelp(null);
-
 			}
 		});
 
