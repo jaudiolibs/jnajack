@@ -22,7 +22,7 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
  *
  *
  */
-public enum JackTransportStates {
+public enum JackTransportState {
 	/**
 	 * Transport halted
 	 */
@@ -50,12 +50,28 @@ public enum JackTransportStates {
 	
 	int val;
 	
-	JackTransportStates(int v) {
+	JackTransportState(int v) {
 		val = v;
 	}
 	
 	public int getIntVal() {
 		return val;
+	}
+	
+	/**
+	 * Find the appropriate {@code JackTransportState} for the supplied {@code int} value.
+	 *  
+	 * @param value The value to test
+	 * @return The corresponding {@code JackTransportState} if one exists, or null otherwise
+	 */
+	public static JackTransportState forVal(int value) {
+		for (JackTransportState state: JackTransportState.values()) {
+			if (state.getIntVal() == value) {
+				return state;
+			}
+		}
+		
+		return null;
 	}
 
 }

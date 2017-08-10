@@ -185,4 +185,35 @@ public class JackLibraryDirect implements JackLibrary {
     
     public native int jack_midi_max_event_size(Pointer port_buffer);
     
+  /// Transport
+  	@Override
+  	public native int jack_release_timebase(_jack_client client);
+
+  	@Override
+  	public native int jack_get_current_transport_frame(_jack_client client);
+
+  	@Override
+  	public native int jack_set_sync_callback(_jack_client client, JackSyncCallback sync_callback, Pointer arg);
+
+  	@Override
+  	public native int jack_set_sync_timeout(_jack_client client, long timeout);
+
+  	@Override
+  	public native int jack_set_timebase_callback(_jack_client client, int conditional, JackTimebaseCallback timebase_callback,
+  			Pointer arg);
+
+  	@Override
+  	public native int jack_transport_locate(_jack_client client, int frame);
+
+  	@Override
+  	public native int jack_transport_query(_jack_client client, jack_position_t pos);
+
+  	@Override
+  	public native int jack_transport_reposition(_jack_client client, jack_position_t pos);
+
+  	@Override
+  	public native void jack_transport_start(_jack_client client);
+
+  	@Override
+  	public native void jack_transport_stop(_jack_client client);
 }

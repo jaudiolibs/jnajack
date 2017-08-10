@@ -440,6 +440,130 @@ public class Jack {
             throw new JackException(e);
         }
     }
+    
+    /// Transport
+    /**
+	 * Query the server for the current transport state and position.
+	 * 
+	 * @param client
+	 * @param position The {@code JackTransport} object to populate
+	 * @return The current transport state (see {@link JackTransportState})
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public int transportQuery(JackClient client, JackPosition position) throws JackException {
+		try {
+			return jackLib.jack_transport_query(client.clientPtr, position.getNativePosition());
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Reposition the transport to a new frame number.
+	 * 
+	 * @param client
+	 * @param frame
+	 * @return 0 if valid request, non-zero otherwise.
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public int transportLocate(JackClient client, int frame) throws JackException {
+		try {
+			return jackLib.jack_transport_locate(client.clientPtr, frame);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Return an estimate of the current transport frame,
+	 * including any time elapsed since the last transport
+	 * positional update.
+	 * 
+	 * @param client
+	 * @return
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public long getCurrentTransportFrame(JackClient client) throws JackException {
+		try {
+			return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_get_current_transport_frame(client.clientPtr));
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Request a new transport position.
+	 * 
+	 * @param client
+	 * @param position
+	 * @return 0 if valid request, non-zero if position structure rejected.
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public int transportReposition(JackClient client, JackPosition position) throws JackException {
+		try {
+			return jackLib.jack_transport_reposition(client.clientPtr, position.getNativePosition());
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Start the JACK transport rolling.
+	 * 
+	 * @param client
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void transportStart(JackClient client) throws JackException {
+		try {
+			jackLib.jack_transport_start(client.clientPtr);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Stop the JACK transport.
+	 * 
+	 * @param client
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void transportStop(JackClient client) throws JackException {
+		try {
+			jackLib.jack_transport_stop(client.clientPtr);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Set the timeout value for slow-sync clients.
+	 * 
+	 * @param client
+	 * @param timeout
+	 * @return 0 on success, otherwise a non-zero error code.
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public int setSyncTimeout(JackClient client, long timeout) throws JackException {
+		try {
+			return jackLib.jack_set_sync_timeout(client.clientPtr, timeout);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
 
     // @TODO this is not in Jack 1 API - implement usable workaround.
 //    public int[] getVersion() throws JackException {
