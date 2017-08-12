@@ -64,7 +64,7 @@ public enum JackTransportState {
 	 * @param value The value to test
 	 * @return The corresponding {@code JackTransportState} if one exists, or null otherwise
 	 */
-	public static JackTransportState forVal(int value) {
+	static JackTransportState forVal(int value) {
 		for (JackTransportState state: JackTransportState.values()) {
 			if (state.getIntVal() == value) {
 				return state;

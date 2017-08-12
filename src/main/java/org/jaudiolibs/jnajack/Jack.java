@@ -451,9 +451,10 @@ public class Jack {
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public int transportQuery(JackClient client, JackPosition position) throws JackException {
+	public JackTransportState transportQuery(JackClient client, JackPosition position) throws JackException {
 		try {
-			return jackLib.jack_transport_query(client.clientPtr, position.getNativePosition());
+			int state = jackLib.jack_transport_query(client.clientPtr, position.getNativePosition());
+			return JackTransportState.forVal(state);
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);
@@ -465,13 +466,14 @@ public class Jack {
 	 * 
 	 * @param client
 	 * @param frame
-	 * @return 0 if valid request, non-zero otherwise.
+	 * @return {@code true} if valid request, {@code false} otherwise.
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public int transportLocate(JackClient client, int frame) throws JackException {
+	public boolean transportLocate(JackClient client, int frame) throws JackException {
 		try {
-			return jackLib.jack_transport_locate(client.clientPtr, frame);
+			
+			return jackLib.jack_transport_locate(client.clientPtr, frame) == 0;
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);
@@ -502,13 +504,13 @@ public class Jack {
 	 * 
 	 * @param client
 	 * @param position
-	 * @return 0 if valid request, non-zero if position structure rejected.
+	 * @return {@code true} if valid request, {@code false} if position structure rejected.
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public int transportReposition(JackClient client, JackPosition position) throws JackException {
+	public boolean transportReposition(JackClient client, JackPosition position) throws JackException {
 		try {
-			return jackLib.jack_transport_reposition(client.clientPtr, position.getNativePosition());
+			return jackLib.jack_transport_reposition(client.clientPtr, position.getNativePosition()) == 0;
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);
@@ -552,13 +554,13 @@ public class Jack {
 	 * 
 	 * @param client
 	 * @param timeout
-	 * @return 0 on success, otherwise a non-zero error code.
+	 * @return {@code true} on success, {@code false} otherwise
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public int setSyncTimeout(JackClient client, long timeout) throws JackException {
+	public boolean setSyncTimeout(JackClient client, long timeout) throws JackException {
 		try {
-			return jackLib.jack_set_sync_timeout(client.clientPtr, timeout);
+			return jackLib.jack_set_sync_timeout(client.clientPtr, timeout) == 0;
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);

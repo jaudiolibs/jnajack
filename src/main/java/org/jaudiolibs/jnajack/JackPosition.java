@@ -144,11 +144,11 @@ public class JackPosition {
 		return nativePosition.unique_2;
 	}
 	
-	public JackLibrary.jack_position_t getNativePosition() {
+	JackLibrary.jack_position_t getNativePosition() {
 		return nativePosition;
 	}
 	
-	public void setNativePosition(JackLibrary.jack_position_t np) {
+	void setNativePosition(JackLibrary.jack_position_t np) {
 		if (np == null)
 			throw new NullPointerException();
 		

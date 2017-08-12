@@ -26,8 +26,9 @@ public interface JackSyncCallback {
 	 * JackTransportStarting state. This realtime function must not wait.
 	 * 
 	 * @param client
+	 * @param position
 	 * @param state 
 	 */
-	public void slowSync(JackClient client, int state);
+	public void slowSync(JackClient client, JackPosition position, JackTransportState state);
 
 }

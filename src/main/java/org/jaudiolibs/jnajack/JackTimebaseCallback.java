@@ -24,7 +24,7 @@ public interface JackTimebaseCallback {
 	 * Called when there is a time change (position, BPM, state, etc.)
 	 * 
 	 * @param invokingClient
-	 * @param state The current transport state (see {@link JackTransportState})
+	 * @param state The current transport state 
 	 * @param nframes The number of frames in current period
 	 * @param position The {@link JackPosition} object for the next cycle; {@code position.getFrame()} will be its frame
 	 *        number.
@@ -36,7 +36,7 @@ public interface JackTimebaseCallback {
 	 * @param newPosition {@code true} for a newly requested position, or for the first cycle after the
 	 *        timebase_callback is defined.
 	 */
-	public void timebaseChanged(JackClient invokingClient, int state, int nframes, JackPosition position,
+	public void timebaseChanged(JackClient invokingClient, JackTransportState state, int nframes, JackPosition position,
 			boolean newPosition);
 
 }

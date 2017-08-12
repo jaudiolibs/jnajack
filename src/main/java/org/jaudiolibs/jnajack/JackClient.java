@@ -58,7 +58,6 @@ public class JackClient {
     final Jack jack;
     final JackLibrary jackLib;
     final String name;
-    final JackPosition position; // TODO verify that it's reasonable to have this here
     
     JackLibrary._jack_client clientPtr; // package private
     
@@ -82,7 +81,6 @@ public class JackClient {
         this.jack = jack;
         this.jackLib = jack.jackLib;
         this.clientPtr = client;
-        position = new JackPosition();
         shutdownCallback = new ShutdownCallback();
         try {
             jackLib.jack_on_shutdown(client, shutdownCallback, null);
@@ -555,10 +553,6 @@ public class JackClient {
         return name;
     }
     
-    public JackPosition getPosition() {
-		return position;
-	}
-
     /**
      * Get the sample rate of the jack system, as set by the user when jackd was
      * started.
@@ -867,9 +861,12 @@ public class JackClient {
 	private class TimebaseCallbackWrapper implements JackLibrary.JackTimebaseCallback {
 
 		JackTimebaseCallback callback;
-
+		JackPosition position;
+		
 		public TimebaseCallbackWrapper(JackTimebaseCallback cb) {
 			callback = cb;
+			position = new JackPosition();
+			
 		}
 
 		/*
@@ -880,9 +877,10 @@ public class JackClient {
 		@Override
 		public void invoke(int state, int nframes, jack_position_t pos, int new_pos, Pointer arg) {
 			try {
+				JackTransportState stateEnum = JackTransportState.forVal(state);
 				boolean newPosition = (new_pos == 1);
 				position.setNativePosition(pos);
-				callback.timebaseChanged(JackClient.this, state, nframes, position, newPosition);
+				callback.timebaseChanged(JackClient.this, stateEnum, nframes, position, newPosition);
 			} catch (Throwable e) {
 				LOG.log(Level.SEVERE, "Error in timebase callback", e);
 			}
@@ -898,9 +896,11 @@ public class JackClient {
 	private class SyncCallbackWrapper implements JackLibrary.JackSyncCallback {
 		
 		JackSyncCallback callback;
+		JackPosition position;
 		
 		public SyncCallbackWrapper(JackSyncCallback cb) {
 			callback = cb;
+			position = new JackPosition();
 		}
 
 		/*
@@ -911,8 +911,11 @@ public class JackClient {
 		@Override
 		public int invoke(int state, jack_position_t pos, Pointer arg) {
 			int ret = -1;
+			JackTransportState stateEnum = JackTransportState.forVal(state);
+			
 			try {
-				callback.slowSync(JackClient.this, state);
+				position.setNativePosition(pos);
+				callback.slowSync(JackClient.this, position, stateEnum);
 				ret = 0;
 			} catch (Throwable e) {
 				LOG.log(Level.SEVERE, "Error in timebase callback", e);
