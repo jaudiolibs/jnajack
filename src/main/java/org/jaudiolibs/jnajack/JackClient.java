@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
+import org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t;
 import org.jaudiolibs.jnajack.NativeToJavaTypeConverter;
 
 import com.sun.jna.NativeLong;
@@ -70,6 +71,8 @@ public class JackClient {
     private PortConnectCallbackWrapper portConnectCallback;
     private ShutdownCallback shutdownCallback;
     private JackShutdownCallback userShutdownCallback;
+    private TimebaseCallbackWrapper timebaseCallback;
+	private SyncCallbackWrapper syncCallback;
     private JackPort[] ports;
     
 
@@ -414,6 +417,62 @@ public class JackClient {
             throw new JackException();
         }
     }
+    
+    /**
+	 * Set interface to be called if timebase state or position changes
+	 * 
+	 * @param callback
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void setTimebaseCallback(JackTimebaseCallback callback, int conditional) throws JackException {
+		if (callback == null)
+			throw new NullPointerException();
+
+		TimebaseCallbackWrapper wrapper = new TimebaseCallbackWrapper(callback);
+
+		int ret = -1;
+		try {
+			ret = jackLib.jack_set_timebase_callback(clientPtr, conditional, wrapper, null);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+
+		if (ret == 0) {
+			timebaseCallback = wrapper;
+		} else {
+			throw new JackException();
+		}
+	}
+	
+	/**
+	 * Set the interface to be called on timebase changes for 'slow-sync' clients
+	 * 
+	 * @param callback
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void setSyncCallback(JackSyncCallback callback) throws JackException {
+		if (callback == null)
+			throw new NullPointerException();
+		
+		SyncCallbackWrapper wrapper = new SyncCallbackWrapper(callback);
+		
+		int ret = -1;
+		try {
+			jackLib.jack_set_sync_callback(clientPtr, wrapper, null);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+		
+		if (ret == 0) {
+			syncCallback = wrapper;
+		} else {
+			throw new JackException();
+		}
+	}
 
     /**
      * Register a function (and argument) to be called if and when the JACK
@@ -478,11 +537,22 @@ public class JackClient {
             clientPtr = null;
         }
     }
+    
+    /**
+	 * Tell the JACK server to release this client as the timebase master
+	 */
+	public void releaseTimebase() {
+		try {
+			jackLib.jack_release_timebase(clientPtr);
+		} catch (Throwable t) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, t);
+		}
+	}
 
     public String getName() {
         return name;
     }
-
+    
     /**
      * Get the sample rate of the jack system, as set by the user when jackd was
      * started.
@@ -782,4 +852,76 @@ public class JackClient {
             return ret;
         }
     }
+    
+    /**
+	 * @author Matthew MacLeod
+	 *
+	 *
+	 */
+	private class TimebaseCallbackWrapper implements JackLibrary.JackTimebaseCallback {
+
+		JackTimebaseCallback callback;
+		JackPosition position;
+		
+		public TimebaseCallbackWrapper(JackTimebaseCallback cb) {
+			callback = cb;
+			position = new JackPosition();
+			
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.jaudiolibs.jnajack.lowlevel.JackLibrary.JackTimebaseCallback#invoke(int, int,
+		 * org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t, int, com.sun.jna.Pointer)
+		 */
+		@Override
+		public void invoke(int state, int nframes, jack_position_t pos, int new_pos, Pointer arg) {
+			try {
+				JackTransportState stateEnum = JackTransportState.forVal(state);
+				boolean newPosition = (new_pos == 1);
+				position.setNativePosition(pos);
+				callback.timebaseChanged(JackClient.this, stateEnum, nframes, position, newPosition);
+			} catch (Throwable e) {
+				LOG.log(Level.SEVERE, "Error in timebase callback", e);
+			}
+		}
+
+	}
+
+	/**
+	 * @author Matthew MacLeod
+	 *
+	 *
+	 */
+	private class SyncCallbackWrapper implements JackLibrary.JackSyncCallback {
+		
+		JackSyncCallback callback;
+		JackPosition position;
+		
+		public SyncCallbackWrapper(JackSyncCallback cb) {
+			callback = cb;
+			position = new JackPosition();
+		}
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.jaudiolibs.jnajack.lowlevel.JackLibrary.JackSyncCallback#invoke(int,
+		 * org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t, com.sun.jna.Pointer)
+		 */
+		@Override
+		public int invoke(int state, jack_position_t pos, Pointer arg) {
+			int ret = -1;
+			JackTransportState stateEnum = JackTransportState.forVal(state);
+			
+			try {
+				position.setNativePosition(pos);
+				callback.slowSync(JackClient.this, position, stateEnum);
+				ret = 0;
+			} catch (Throwable e) {
+				LOG.log(Level.SEVERE, "Error in timebase callback", e);
+			}
+			
+			return ret;
+		}
+	}
 }
