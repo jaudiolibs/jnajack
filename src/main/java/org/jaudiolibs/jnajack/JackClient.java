@@ -1,9 +1,10 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014 Neil C Smith
+ * Copyright 2017 Neil C Smith
  * Some methods copyright 2012 Chuck Ritola
  * Some methods copyright 2014 Daniel Hams
+ * Some methods Copyright 2017 Matthew MacLeod
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -35,7 +36,6 @@ import java.util.logging.Logger;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t;
-import org.jaudiolibs.jnajack.NativeToJavaTypeConverter;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -425,7 +425,7 @@ public class JackClient {
 	 * @throws JackException
 	 * @author Matthew MacLeod
 	 */
-	public void setTimebaseCallback(JackTimebaseCallback callback, int conditional) throws JackException {
+	public void setTimebaseCallback(JackTimebaseCallback callback, boolean conditional) throws JackException {
 		if (callback == null)
 			throw new NullPointerException();
 
@@ -433,7 +433,7 @@ public class JackClient {
 
 		int ret = -1;
 		try {
-			ret = jackLib.jack_set_timebase_callback(clientPtr, conditional, wrapper, null);
+			ret = jackLib.jack_set_timebase_callback(clientPtr, conditional ? 1 : 0, wrapper, null);
 		} catch (Throwable e) {
 			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
 			throw new JackException(e);
@@ -537,6 +537,126 @@ public class JackClient {
             clientPtr = null;
         }
     }
+    
+    
+    /// Transport
+    /**
+	 * Query the server for the current transport state and position.
+	 * 
+	 * @param position The {@code JackTransport} object to populate
+	 * @return The current transport state (see {@link JackTransportState})
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public JackTransportState transportQuery(JackPosition position) throws JackException {
+		try {
+			int state = jackLib.jack_transport_query(clientPtr, position.getNativePosition());
+			return JackTransportState.forVal(state);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Reposition the transport to a new frame number.
+	 * 
+	 * @param frame
+	 * @return {@code true} if valid request, {@code false} otherwise.
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public boolean transportLocate(int frame) throws JackException {
+		try {
+			
+			return jackLib.jack_transport_locate(clientPtr, frame) == 0;
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Return an estimate of the current transport frame,
+	 * including any time elapsed since the last transport
+	 * positional update.
+	 * 
+	 * @return
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public long getCurrentTransportFrame() throws JackException {
+		try {
+			return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_get_current_transport_frame(clientPtr));
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Request a new transport position.
+	 * 
+	 * @param position
+	 * @return {@code true} if valid request, {@code false} if position structure rejected.
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public boolean transportReposition(JackPosition position) throws JackException {
+		try {
+			return jackLib.jack_transport_reposition(clientPtr, position.getNativePosition()) == 0;
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Start the JACK transport rolling.
+	 * 
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void transportStart() throws JackException {
+		try {
+			jackLib.jack_transport_start(clientPtr);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Stop the JACK transport.
+	 * 
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public void transportStop() throws JackException {
+		try {
+			jackLib.jack_transport_stop(clientPtr);
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
+
+	/**
+	 * Set the timeout value for slow-sync clients.
+	 * 
+	 * @param timeout
+	 * @return {@code true} on success, {@code false} otherwise
+	 * @throws JackException
+	 * @author Matthew MacLeod
+	 */
+	public boolean setSyncTimeout(long timeout) throws JackException {
+		try {
+			return jackLib.jack_set_sync_timeout(clientPtr, timeout) == 0;
+		} catch (Throwable e) {
+			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+			throw new JackException(e);
+		}
+	}
     
     /**
 	 * Tell the JACK server to release this client as the timebase master
