@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  * Some methods copyright 2014 Daniel Hams
  * Some methods Copyright 2017 Matthew MacLeod
  *
@@ -686,7 +686,7 @@ public interface JackLibrary extends com.sun.jna.Library {
     public interface JackSyncCallback extends com.sun.jna.Callback {
         /// @param state @see jack_transport_state_t
 
-        int invoke(int state, jack_position_t pos, com.sun.jna.Pointer arg);
+        int invoke(int state, com.sun.jna.Pointer pos, com.sun.jna.Pointer arg);
     }
     /**
      * Prototype for the @a timebase_callback used to provide extended
@@ -726,7 +726,7 @@ public interface JackLibrary extends com.sun.jna.Library {
          * @param new_pos
          * @param arg
          */
-        void invoke(int state, int nframes, jack_position_t pos, int new_pos, com.sun.jna.Pointer arg);
+        void invoke(int state, int nframes, com.sun.jna.Pointer pos, int new_pos, com.sun.jna.Pointer arg);
     }
     /// <i>native declaration : jack/jack.h:998</i>
     public interface jack_error_callback extends com.sun.jna.Callback {

@@ -36,7 +36,7 @@ public interface JackTimebaseCallback {
 	 * @param newPosition {@code true} for a newly requested position, or for the first cycle after the
 	 *        timebase_callback is defined.
 	 */
-	public void timebaseChanged(JackClient invokingClient, JackTransportState state, int nframes, JackPosition position,
+	public void updatePosition(JackClient invokingClient, JackTransportState state, int nframes, JackPosition position,
 			boolean newPosition);
 
 }

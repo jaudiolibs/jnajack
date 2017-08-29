@@ -32,7 +32,7 @@ public enum JackPositionBits {
 		val = v;
 	}
 	
-	public int getIntVal() {
+	public int getIntValue() {
 		return val;
 	}
 

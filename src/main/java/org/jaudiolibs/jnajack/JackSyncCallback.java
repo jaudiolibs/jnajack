@@ -1,6 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * Copyright (c) 2017 Matthew MacLeod
+ * Copyright (c) 2017 Neil C Smith
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation; either version 2.1 of the License,
@@ -28,7 +29,8 @@ public interface JackSyncCallback {
 	 * @param client
 	 * @param position
 	 * @param state 
+     * @return true when client ready to roll
 	 */
-	public void slowSync(JackClient client, JackPosition position, JackTransportState state);
+	public boolean syncPosition(JackClient client, JackPosition position, JackTransportState state);
 
 }

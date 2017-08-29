@@ -40,6 +40,8 @@ import org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.ByteByReference;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 /**
  * Wraps a native Jack client.
@@ -54,13 +56,13 @@ public class JackClient {
     private final static Logger LOG = Logger.getLogger(JackClient.class.getName());
     private final static String CALL_ERROR_MSG = "Error calling native lib";
     private final static int FRAME_SIZE = 4;
-     
+
     final Jack jack;
     final JackLibrary jackLib;
     final String name;
-    
+
     JackLibrary._jack_client clientPtr; // package private
-    
+
     private ProcessCallbackWrapper processCallback; // reference kept - is in use!
     private XRunCallbackWrapper xrunCallback;
     private BufferSizeCallbackWrapper buffersizeCallback;
@@ -72,9 +74,8 @@ public class JackClient {
     private ShutdownCallback shutdownCallback;
     private JackShutdownCallback userShutdownCallback;
     private TimebaseCallbackWrapper timebaseCallback;
-	private SyncCallbackWrapper syncCallback;
+    private SyncCallbackWrapper syncCallback;
     private JackPort[] ports;
-    
 
     JackClient(String name, Jack jack, JackLibrary._jack_client client) {
         this.name = name;
@@ -220,8 +221,8 @@ public class JackClient {
     }
 
     /**
-     * Tell the jack server to call the JackXrunCallback whenever there is
-     * an xrun reported by the Jack server.
+     * Tell the jack server to call the JackXrunCallback whenever there is an
+     * xrun reported by the Jack server.
      *
      * @param callback
      * @throws JackException
@@ -252,6 +253,7 @@ public class JackClient {
             }
         }
     }
+
     /**
      * Tell the JACK server to call the supplied JackGraphOrderCallback whenever
      * the processing graph is reordered. * All "notification events" are
@@ -417,62 +419,65 @@ public class JackClient {
             throw new JackException();
         }
     }
-    
+
     /**
-	 * Set interface to be called if timebase state or position changes
-	 * 
-	 * @param callback
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public void setTimebaseCallback(JackTimebaseCallback callback, boolean conditional) throws JackException {
-		if (callback == null)
-			throw new NullPointerException();
+     * Set interface to be called if timebase state or position changes
+     *
+     * @param callback
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public void setTimebaseCallback(JackTimebaseCallback callback, boolean conditional) throws JackException {
+        if (callback == null) {
+            throw new NullPointerException();
+        }
 
-		TimebaseCallbackWrapper wrapper = new TimebaseCallbackWrapper(callback);
+        TimebaseCallbackWrapper wrapper = new TimebaseCallbackWrapper(callback);
 
-		int ret = -1;
-		try {
-			ret = jackLib.jack_set_timebase_callback(clientPtr, conditional ? 1 : 0, wrapper, null);
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
+        int ret = -1;
+        try {
+            ret = jackLib.jack_set_timebase_callback(clientPtr, conditional ? 1 : 0, wrapper, null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
 
-		if (ret == 0) {
-			timebaseCallback = wrapper;
-		} else {
-			throw new JackException();
-		}
-	}
-	
-	/**
-	 * Set the interface to be called on timebase changes for 'slow-sync' clients
-	 * 
-	 * @param callback
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public void setSyncCallback(JackSyncCallback callback) throws JackException {
-		if (callback == null)
-			throw new NullPointerException();
-		
-		SyncCallbackWrapper wrapper = new SyncCallbackWrapper(callback);
-		
-		int ret = -1;
-		try {
-			jackLib.jack_set_sync_callback(clientPtr, wrapper, null);
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-		
-		if (ret == 0) {
-			syncCallback = wrapper;
-		} else {
-			throw new JackException();
-		}
-	}
+        if (ret == 0) {
+            timebaseCallback = wrapper;
+        } else {
+            throw new JackException();
+        }
+    }
+
+    /**
+     * Set the interface to be called on timebase changes for 'slow-sync'
+     * clients
+     *
+     * @param callback
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public void setSyncCallback(JackSyncCallback callback) throws JackException {
+        if (callback == null) {
+            throw new NullPointerException();
+        }
+
+        SyncCallbackWrapper wrapper = new SyncCallbackWrapper(callback);
+
+        int ret = -1;
+        try {
+            jackLib.jack_set_sync_callback(clientPtr, wrapper, null);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+
+        if (ret == 0) {
+            syncCallback = wrapper;
+        } else {
+            throw new JackException();
+        }
+    }
 
     /**
      * Register a function (and argument) to be called if and when the JACK
@@ -537,142 +542,141 @@ public class JackClient {
             clientPtr = null;
         }
     }
-    
-    
+
     /// Transport
     /**
-	 * Query the server for the current transport state and position.
-	 * 
-	 * @param position The {@code JackTransport} object to populate
-	 * @return The current transport state (see {@link JackTransportState})
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public JackTransportState transportQuery(JackPosition position) throws JackException {
-		try {
-			int state = jackLib.jack_transport_query(clientPtr, position.getNativePosition());
-			return JackTransportState.forVal(state);
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
+     * Query the server for the current transport state and position.
+     *
+     * @param position The {@code JackTransport} object to populate
+     * @return The current transport state (see {@link JackTransportState})
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public JackTransportState transportQuery(JackPosition position) throws JackException {
+        try {
+            int state = jackLib.jack_transport_query(clientPtr, position.getNativePosition());
+            return JackTransportState.forVal(state);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
 
-	/**
-	 * Reposition the transport to a new frame number.
-	 * 
-	 * @param frame
-	 * @return {@code true} if valid request, {@code false} otherwise.
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public boolean transportLocate(int frame) throws JackException {
-		try {
-			
-			return jackLib.jack_transport_locate(clientPtr, frame) == 0;
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-
-	/**
-	 * Return an estimate of the current transport frame,
-	 * including any time elapsed since the last transport
-	 * positional update.
-	 * 
-	 * @return
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public long getCurrentTransportFrame() throws JackException {
-		try {
-			return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_get_current_transport_frame(clientPtr));
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-
-	/**
-	 * Request a new transport position.
-	 * 
-	 * @param position
-	 * @return {@code true} if valid request, {@code false} if position structure rejected.
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public boolean transportReposition(JackPosition position) throws JackException {
-		try {
-			return jackLib.jack_transport_reposition(clientPtr, position.getNativePosition()) == 0;
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-
-	/**
-	 * Start the JACK transport rolling.
-	 * 
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public void transportStart() throws JackException {
-		try {
-			jackLib.jack_transport_start(clientPtr);
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-
-	/**
-	 * Stop the JACK transport.
-	 * 
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public void transportStop() throws JackException {
-		try {
-			jackLib.jack_transport_stop(clientPtr);
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-
-	/**
-	 * Set the timeout value for slow-sync clients.
-	 * 
-	 * @param timeout
-	 * @return {@code true} on success, {@code false} otherwise
-	 * @throws JackException
-	 * @author Matthew MacLeod
-	 */
-	public boolean setSyncTimeout(long timeout) throws JackException {
-		try {
-			return jackLib.jack_set_sync_timeout(clientPtr, timeout) == 0;
-		} catch (Throwable e) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
-			throw new JackException(e);
-		}
-	}
-    
     /**
-	 * Tell the JACK server to release this client as the timebase master
-	 */
-	public void releaseTimebase() {
-		try {
-			jackLib.jack_release_timebase(clientPtr);
-		} catch (Throwable t) {
-			LOG.log(Level.SEVERE, CALL_ERROR_MSG, t);
-		}
-	}
+     * Reposition the transport to a new frame number.
+     *
+     * @param frame
+     * @return {@code true} if valid request, {@code false} otherwise.
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public boolean transportLocate(int frame) throws JackException {
+        try {
+
+            return jackLib.jack_transport_locate(clientPtr, frame) == 0;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Return an estimate of the current transport frame, including any time
+     * elapsed since the last transport positional update.
+     *
+     * @return
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public long getCurrentTransportFrame() throws JackException {
+        try {
+            return NativeToJavaTypeConverter.nuint32ToJlong(jackLib.jack_get_current_transport_frame(clientPtr));
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Request a new transport position.
+     *
+     * @param position
+     * @return {@code true} if valid request, {@code false} if position
+     * structure rejected.
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public boolean transportReposition(JackPosition position) throws JackException {
+        try {
+            return jackLib.jack_transport_reposition(clientPtr, position.getNativePosition()) == 0;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Start the JACK transport rolling.
+     *
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public void transportStart() throws JackException {
+        try {
+            jackLib.jack_transport_start(clientPtr);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Stop the JACK transport.
+     *
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public void transportStop() throws JackException {
+        try {
+            jackLib.jack_transport_stop(clientPtr);
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Set the timeout value for slow-sync clients.
+     *
+     * @param timeout
+     * @return {@code true} on success, {@code false} otherwise
+     * @throws JackException
+     * @author Matthew MacLeod
+     */
+    public boolean setSyncTimeout(long timeout) throws JackException {
+        try {
+            return jackLib.jack_set_sync_timeout(clientPtr, timeout) == 0;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
+    /**
+     * Tell the JACK server to release this client as the timebase master
+     */
+    public void releaseTimebase() {
+        try {
+            jackLib.jack_release_timebase(clientPtr);
+        } catch (Throwable t) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, t);
+        }
+    }
 
     public String getName() {
         return name;
     }
-    
+
     /**
      * Get the sample rate of the jack system, as set by the user when jackd was
      * started.
@@ -708,15 +712,15 @@ public class JackClient {
     }
 
     /**
-     * This function may only be used within the process() callback.
-     * It provides the internal timing information that can be
-     * related to other timing related functions within Jack. It allows the
-     * caller to map between frame counts within the time warped jack callback
-     * and the "real world" outside of that.
-     * It provides the time at the start of the current processing cycle as
-     * a count of the number of sample frames that have passed.
+     * This function may only be used within the process() callback. It provides
+     * the internal timing information that can be related to other timing
+     * related functions within Jack. It allows the caller to map between frame
+     * counts within the time warped jack callback and the "real world" outside
+     * of that. It provides the time at the start of the current processing
+     * cycle as a count of the number of sample frames that have passed.
      *
-     * @return current processing period start time in frames - native 32 bit unsigned int as long
+     * @return current processing period start time in frames - native 32 bit
+     * unsigned int as long
      * @throws JackException
      */
     public long getLastFrameTime() throws JackException {
@@ -729,12 +733,12 @@ public class JackClient {
     }
 
     /**
-     * Provides the estimated current time in frames.
-     * This can be used to relate events inside the Jack process()
-     * callback to events happening outside in regular runtime classes
-     * such as a GUI.
+     * Provides the estimated current time in frames. This can be used to relate
+     * events inside the Jack process() callback to events happening outside in
+     * regular runtime classes such as a GUI.
      *
-     * @return current estimated time in frames - native 32 bit unsigned int as long
+     * @return current estimated time in frames - native 32 bit unsigned int as
+     * long
      * @throws JackException
      */
     public long getFrameTime() throws JackException {
@@ -807,20 +811,20 @@ public class JackClient {
     }
 
     private class XRunCallbackWrapper implements JackLibrary.JackXRunCallback {
+
         JackXrunCallback callback;
 
-        XRunCallbackWrapper(JackXrunCallback callback ) {
+        XRunCallbackWrapper(JackXrunCallback callback) {
             this.callback = callback;
         }
 
         @Override
-        public int invoke(Pointer arg)
-        {
+        public int invoke(Pointer arg) {
             int ret = -1;
             try {
                 callback.xrunOccured(JackClient.this);
-            } catch (Throwable e ) {
-                LOG.log(Level.SEVERE, "Error in xrun callback", e );
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in xrun callback", e);
                 ret = -1;
             }
 
@@ -972,76 +976,119 @@ public class JackClient {
             return ret;
         }
     }
-    
+
     /**
-	 * @author Matthew MacLeod
-	 *
-	 *
-	 */
-	private class TimebaseCallbackWrapper implements JackLibrary.JackTimebaseCallback {
+     * @author Matthew MacLeod
+     *
+     *
+     */
+    private class TimebaseCallbackWrapper implements JackLibrary.JackTimebaseCallback {
 
-		JackTimebaseCallback callback;
-		JackPosition position;
-		
-		public TimebaseCallbackWrapper(JackTimebaseCallback cb) {
-			callback = cb;
-			position = new JackPosition();
-			
-		}
+        private final JackTimebaseCallback callback;
+        private final JackPosition position;
+        private final LRUCache<Pointer, EXT_jack_position_t> structs;
 
-		/*
+        public TimebaseCallbackWrapper(JackTimebaseCallback cb) {
+            callback = cb;
+            position = new JackPosition(null);
+            structs = new LRUCache<Pointer, EXT_jack_position_t>(4);
+            jack.setupCTI(this);
+        }
+
+        /*
 		 * (non-Javadoc)
 		 * @see org.jaudiolibs.jnajack.lowlevel.JackLibrary.JackTimebaseCallback#invoke(int, int,
 		 * org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t, int, com.sun.jna.Pointer)
-		 */
-		@Override
-		public void invoke(int state, int nframes, jack_position_t pos, int new_pos, Pointer arg) {
-			try {
-				JackTransportState stateEnum = JackTransportState.forVal(state);
-				boolean newPosition = (new_pos == 1);
-				position.setNativePosition(pos);
-				callback.timebaseChanged(JackClient.this, stateEnum, nframes, position, newPosition);
-			} catch (Throwable e) {
-				LOG.log(Level.SEVERE, "Error in timebase callback", e);
-			}
-		}
+         */
+        @Override
+        public void invoke(int state, int nframes, Pointer pos, int new_pos, Pointer arg) {
+            try {
+                JackTransportState stateEnum = JackTransportState.forVal(state);
+                EXT_jack_position_t nativePos = structs.get(pos);
+                if (nativePos == null) {
+                    nativePos = new EXT_jack_position_t(pos);
+                    structs.put(pos, nativePos);
+                }
+                nativePos.read();
+                position.setNativePosition(nativePos);
+                callback.updatePosition(JackClient.this, stateEnum, nframes, position, new_pos != 0);
+                nativePos.write();
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in timebase callback", e);
+            }
+        }
 
-	}
+    }
 
-	/**
-	 * @author Matthew MacLeod
-	 *
-	 *
-	 */
-	private class SyncCallbackWrapper implements JackLibrary.JackSyncCallback {
-		
-		JackSyncCallback callback;
-		JackPosition position;
-		
-		public SyncCallbackWrapper(JackSyncCallback cb) {
-			callback = cb;
-			position = new JackPosition();
-		}
+    /**
+     * @author Matthew MacLeod
+     *
+     *
+     */
+    private class SyncCallbackWrapper implements JackLibrary.JackSyncCallback {
 
-		/*
+        private final JackSyncCallback callback;
+        private final JackPosition position;
+        private final LRUCache<Pointer, EXT_jack_position_t> structs;
+
+        public SyncCallbackWrapper(JackSyncCallback cb) {
+            callback = cb;
+            position = new JackPosition(null);
+            structs = new LRUCache<Pointer, EXT_jack_position_t>(4);
+            jack.setupCTI(this);
+        }
+
+        /*
 		 * (non-Javadoc)
 		 * @see org.jaudiolibs.jnajack.lowlevel.JackLibrary.JackSyncCallback#invoke(int,
 		 * org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t, com.sun.jna.Pointer)
-		 */
-		@Override
-		public int invoke(int state, jack_position_t pos, Pointer arg) {
-			int ret = -1;
-			JackTransportState stateEnum = JackTransportState.forVal(state);
-			
-			try {
-				position.setNativePosition(pos);
-				callback.slowSync(JackClient.this, position, stateEnum);
-				ret = 0;
-			} catch (Throwable e) {
-				LOG.log(Level.SEVERE, "Error in timebase callback", e);
-			}
-			
-			return ret;
-		}
-	}
+         */
+        @Override
+        public int invoke(int state, Pointer pos, Pointer arg) {
+            int ret = -1;
+            try {
+                
+                JackTransportState stateEnum = JackTransportState.forVal(state);
+                EXT_jack_position_t nativePos = structs.get(pos);
+                if (nativePos == null) {
+                    nativePos = new EXT_jack_position_t(pos);
+                    structs.put(pos, nativePos);
+                }
+                nativePos.read();
+                position.setNativePosition(nativePos);
+                if (callback.syncPosition(JackClient.this, position, stateEnum)) {
+                    ret = 0;
+                }
+            } catch (Throwable e) {
+                LOG.log(Level.SEVERE, "Error in timebase callback", e);
+            }
+            return ret;
+        }
+    }
+
+    private static class LRUCache<K, V> extends LinkedHashMap<K, V> {
+
+        private final int maxSize;
+
+        private LRUCache(int maxSize) {
+            super(maxSize, 0.75f, true);
+            this.maxSize = maxSize;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Entry<K, V> eldest) {
+            return size() >= maxSize;
+        }
+
+    }
+
+    private static class EXT_jack_position_t extends jack_position_t {
+
+        private EXT_jack_position_t(Pointer ptr) {
+            super(ptr, 0);
+            setAutoSynch(false);
+        }
+
+    }
+
 }

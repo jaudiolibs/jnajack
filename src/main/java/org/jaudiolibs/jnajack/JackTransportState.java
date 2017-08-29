@@ -1,6 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * Copyright (c) 2017 Matthew MacLeod
+ * Copyright (c) 2017 Neil C Smith
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
  * by the Free Software Foundation; either version 2.1 of the License,
@@ -53,10 +54,10 @@ public enum JackTransportState {
 	JackTransportState(int v) {
 		val = v;
 	}
-	
-	public int getIntVal() {
-		return val;
-	}
+	    
+    public int getIntValue() {
+        return val;
+    }
 	
 	/**
 	 * Find the appropriate {@code JackTransportState} for the supplied {@code int} value.
@@ -65,13 +66,15 @@ public enum JackTransportState {
 	 * @return The corresponding {@code JackTransportState} if one exists, or null otherwise
 	 */
 	static JackTransportState forVal(int value) {
-		for (JackTransportState state: JackTransportState.values()) {
-			if (state.getIntVal() == value) {
+		for (JackTransportState state : values) {
+			if (state.getIntValue() == value) {
 				return state;
 			}
 		}
 		
 		return null;
 	}
+    
+    private final static JackTransportState[] values = JackTransportState.values();
 
 }
