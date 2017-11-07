@@ -440,7 +440,7 @@ public class Jack {
             throw new JackException(e);
         }
     }
-
+    
     // @TODO this is not in Jack 1 API - implement usable workaround.
 //    public int[] getVersion() throws JackException {
 //        try {
