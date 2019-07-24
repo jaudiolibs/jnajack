@@ -1,0 +1,19 @@
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+target/
+.flattened-pom.xml
+
+# Eclipse Files #
+.classpath
+.project
+.settings
+
+# NetBeans Files #
+/nbproject/
+nb-configuration.xml
+
+.idea
