@@ -16,7 +16,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this work; if not, see http://www.gnu.org/licenses/
- * 
+ *
  *
  * Please visit http://neilcsmith.net if you need additional information or
  * have any questions.
@@ -35,6 +35,8 @@ import java.util.regex.Pattern;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
 import org.jaudiolibs.jnajack.lowlevel.JackLibraryDirect;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.sun.jna.Callback;
 import com.sun.jna.Native;
@@ -124,8 +126,9 @@ public class Jack {
      *  @throws JackException if client could not be opened. Check status set for
      * reasons.
      */
-    public JackClient openClient(String name, EnumSet<JackOptions> options, EnumSet<JackStatus> status)
-            throws JackException {
+    public @NotNull JackClient openClient(@NotNull String name,
+                                          @Nullable EnumSet<JackOptions> options,
+                                          @Nullable EnumSet<JackStatus> status) throws JackException {
         int opt = 0;
         // turn options into int
         if (options != null) {
@@ -187,8 +190,10 @@ public class Jack {
      *  @return
      *  @throws JackException
      */
-    public JackClient openClient(String name, EnumSet<JackOptions> options, EnumSet<JackStatus> status, Object... args)
-            throws JackException {
+    public @NotNull JackClient openClient(@NotNull String name,
+                                          @Nullable EnumSet<JackOptions> options,
+                                          @Nullable EnumSet<JackStatus> status,
+                                          @Nullable Object... args) throws JackException {
         return openClient(name, options, status);
     }
 
@@ -202,11 +207,13 @@ public class Jack {
      *  @param flags A set of JackPortFlags to filter results by. If the set is
      * empty or null then the results will not be filtered.
      *  @return String[] of full port names.
-     *  @throws net.neilcsmith.jnajack.JackException
+     *  @throws JackException
+     *  @deprecated use {@link #getPorts(JackClient, String, JackPortType, EnumSet)} instead
      */
     @Deprecated
-    public String[] getPorts(String regex, JackPortType type, EnumSet<JackPortFlags> flags)
-            throws JackException {
+    public @NotNull String[] getPorts(@Nullable String regex,
+                                      @Nullable JackPortType type,
+                                      @Nullable EnumSet<JackPortFlags> flags) throws JackException {
         JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
         String[] ret = getPorts(client, regex, type, flags);
         client.close();
@@ -224,10 +231,12 @@ public class Jack {
      *  @param flags A set of JackPortFlags to filter results by. If the set is
      * empty or null then the results will not be filtered.
      *  @return String[] of full port names.
-     *  @throws net.neilcsmith.jnajack.JackException
+     *  @throws JackException
      */
-    public String[] getPorts(JackClient client, String regex, JackPortType type,
-            EnumSet<JackPortFlags> flags) throws JackException {
+    public @NotNull String[] getPorts(@NotNull JackClient client,
+                                      @Nullable String regex,
+                                      @Nullable JackPortType type,
+                                      @Nullable EnumSet<JackPortFlags> flags) throws JackException {
         // don't pass regex String to native method. Invalid Strings can crash the VM
 
         int fl = 0;
@@ -277,9 +286,10 @@ public class Jack {
      *  @param source
      *  @param destination
      *  @throws JackException
+     * @deprecated use {@link #connect(JackClient, String, String)} instead
      */
     @Deprecated
-    public void connect(String source, String destination)
+    public void connect(@NotNull String source, @NotNull String destination)
             throws JackException {
         JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
         connect(client, source, destination);
@@ -298,8 +308,8 @@ public class Jack {
      *  @param destination - input port
      *  @throws JackException
      */
-    public void connect(JackClient client, String source, String destination)
-            throws JackException {
+    public void connect(@NotNull JackClient client, @NotNull String source,
+                        @NotNull String destination) throws JackException {
         int ret = -1;
         try {
             ret = jackLib.jack_connect(client.clientPtr, source, destination);
@@ -318,10 +328,10 @@ public class Jack {
      *  @param source
      *  @param destination
      *  @throws JackException
-     *  @deprecated
+     *  @deprecated use {@link #disconnect(JackClient, String, String)} instead
      */
     @Deprecated
-    public void disconnect(String source, String destination)
+    public void disconnect(@NotNull String source, @NotNull String destination)
             throws JackException {
         JackClient client = openClient("__jnajack__", EnumSet.of(JackOptions.JackNoStartServer), null);
         disconnect(client, source, destination);
@@ -336,8 +346,8 @@ public class Jack {
      *  @param destination - input port
      *  @throws JackException
      */
-    public void disconnect(JackClient client, String source, String destination)
-            throws JackException {
+    public void disconnect(@NotNull JackClient client, @NotNull String source,
+                           @NotNull String destination) throws JackException {
         int ret = -1;
         try {
             ret = jackLib.jack_disconnect(client.clientPtr, source, destination);
@@ -421,7 +431,8 @@ public class Jack {
      *  @since Jul 22, 2012
      */
     //cjritola 2012
-    public String[] getAllConnections(JackClient client, String fullPortName) throws JackException {
+    public @NotNull String[] getAllConnections(@NotNull JackClient client,
+                                               @NotNull String fullPortName) throws JackException {
         if (fullPortName == null) {
             throw new NullPointerException("fullPortName is null.");
         }
@@ -463,10 +474,10 @@ public class Jack {
      *  Get access to the single JNAJack Jack instance.
      *
      *  @return Jack
-     *  @throws net.neilcsmith.jnajack.JackException if native library cannot be
+     *  @throws JackException if native library cannot be
      * loaded.
      */
-    public synchronized static Jack getInstance() throws JackException {
+    public synchronized static @NotNull Jack getInstance() throws JackException {
         if (instance != null) {
             return instance;
         }
