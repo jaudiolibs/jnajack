@@ -9,7 +9,7 @@ import org.jaudiolibs.jnajack.JackPortType;
 import org.jaudiolibs.jnajack.util.SimpleAudioClient;
 
 /**
- *
+ * @deprecated see <a href="https://github.com/jaudiolibs/examples">The examples repository</a> for better examples
  * @author Neil C Smith
  */
 @Deprecated
