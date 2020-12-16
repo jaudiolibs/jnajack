@@ -40,9 +40,9 @@ try {
     Jack jack = Jack.getInstance();
     JackClient client = jack.openClient(
         /*name*/ "My Jack Client",
-        /*options*/, EnumSet.of(JackOptions.JackNoStartServer)
+        /*options*/ EnumSet.of(JackOptions.JackNoStartServer),
         /*status*/ status
-    )
+    );
 } catch (JackException ex) {
     // If something went wrong
     if (!status.isEmpty()) {
