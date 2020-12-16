@@ -34,6 +34,7 @@ import java.util.logging.Logger;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.NativeToJavaTypeConverter;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Wraps a native Jack port.
@@ -79,7 +80,7 @@ public class JackPort {
      * @return buffer associated with this port.
      */
     // @TODO should we create this lazily in call to client. MIDI ports won't require this.
-    public ByteBuffer getBuffer() {
+    public @NotNull ByteBuffer getBuffer() {
         return byteBuffer;
     }
 
@@ -92,7 +93,7 @@ public class JackPort {
      *
      * @return buffer associated with this port.
      */
-    public FloatBuffer getFloatBuffer() {
+    public @NotNull FloatBuffer getFloatBuffer() {
         return floatBuffer;
     }
 
@@ -101,7 +102,7 @@ public class JackPort {
      *
      * @return full name
      */
-    public String getName() {
+    public @NotNull String getName() {
         return client.getName() + ":" + shortName;
     }
 
@@ -110,7 +111,7 @@ public class JackPort {
      *
      * @return short name
      */
-    public String getShortName() {
+    public @NotNull String getShortName() {
         return shortName;
     }
 
@@ -119,7 +120,7 @@ public class JackPort {
      *
      * @return type
      */
-    public JackPortType getType() {
+    public @NotNull JackPortType getType() {
         return type;
     }
     
@@ -132,7 +133,7 @@ public class JackPort {
      * @throws JackException
      * @since Jul 22, 2012
      */
-    public String[] getConnections() throws JackException {
+    public @NotNull String[] getConnections() throws JackException {
         try {
             Pointer ptr = jackLib.jack_port_get_connections(portPtr);
             if (ptr == null) {
@@ -151,11 +152,11 @@ public class JackPort {
     /**
      * Fills the passed latency range structure with the current server
      * information about min and max latency for this port.
-     * @param JackLatencyRange the output lantency range object to be filled
-     * @param JackLatencyCallbackMode the "mode" (playback or capture) the values are required for
+     * @param latencyRange the output lantency range object to be filled
+     * @param mode the "mode" (playback or capture) the values are required for
      */
-    public void getLatencyRange(JackLatencyRange latencyRange,
-            JackLatencyCallbackMode mode) throws JackException {
+    public void getLatencyRange(@NotNull JackLatencyRange latencyRange,
+                                @NotNull JackLatencyCallbackMode mode) throws JackException {
         try {
             jackLib.jack_port_get_latency_range(portPtr, mode.val,
                     latencyRange.nativeRange);
