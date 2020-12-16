@@ -276,7 +276,7 @@ public class JackClient {
     public void setGraphOrderCallback(@NotNull JackGraphOrderCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException("Passed callback is null.");
+            throw new NullPointerException("Passed graph order callback is null.");
         }
 
         try {
@@ -306,7 +306,7 @@ public class JackClient {
     public void setClientRegistrationCallback(@NotNull JackClientRegistrationCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException("Passed callback is null.");
+            throw new NullPointerException("Passed client registration callback is null.");
         }
         try {
             jackLib.jack_set_client_registration_callback(
@@ -335,7 +335,7 @@ public class JackClient {
     public void setPortConnectCallback(@NotNull JackPortConnectCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException("Passed callback is null.");
+            throw new NullPointerException("Passed port connect callback is null.");
         }
         try {
             jackLib.jack_set_port_connect_callback(
@@ -364,7 +364,7 @@ public class JackClient {
     public void setPortRegistrationCallback(@NotNull JackPortRegistrationCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException("Passed callback is null.");
+            throw new NullPointerException("Passed port registration callback is null.");
         }
         try {
             jackLib.jack_set_port_registration_callback(
@@ -383,7 +383,7 @@ public class JackClient {
     public void setBuffersizeCallback(@NotNull JackBufferSizeCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Passed buffer size callback is null.");
         }
         BufferSizeCallbackWrapper wrapper = new BufferSizeCallbackWrapper(callback);
         int ret = -1;
@@ -409,7 +409,7 @@ public class JackClient {
     public void setSampleRateCallback(@NotNull JackSampleRateCallback callback)
             throws JackException {
         if (callback == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Passed sample rate callback is null");
         }
         SampleRateCallbackWrapper wrapper = new SampleRateCallbackWrapper(callback);
         int ret = -1;
@@ -436,7 +436,7 @@ public class JackClient {
     public void setTimebaseCallback(@NotNull JackTimebaseCallback callback,
                                     boolean conditional) throws JackException {
         if (callback == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Passed timebase callback is null");
         }
 
         TimebaseCallbackWrapper wrapper = new TimebaseCallbackWrapper(callback);
@@ -466,7 +466,7 @@ public class JackClient {
      */
     public void setSyncCallback(@NotNull JackSyncCallback callback) throws JackException {
         if (callback == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Passed sync callback is null");
         }
 
         SyncCallbackWrapper wrapper = new SyncCallbackWrapper(callback);

@@ -57,7 +57,7 @@ public class JackPortType {
      */
     public JackPortType(@NotNull String type, int bufferSize) {
         if (type == null) {
-            throw new NullPointerException();
+            throw new NullPointerException("Type is null");
         }
         this.type = type;
         this.bufferSize = bufferSize;
