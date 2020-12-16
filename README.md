@@ -55,7 +55,7 @@ try {
 You can register ports using the newly opened client
 ```java
 JackPort midiInPort = client.registerPort("My MIDI in", JackPortType.MIDI, JackPortFlags.JackPortIsInput);
-JackPort audioOutPort = client.registerPort("My Audio out", JackPortType.MIDI, JackPortFlags.JackPortIsOutput);
+JackPort audioOutPort = client.registerPort("My Audio out", JackPortType.AUDIO, JackPortFlags.JackPortIsOutput);
 ```
 
 For more detailed examples, check out [the examples repository](https://github.com/jaudiolibs/examples)
