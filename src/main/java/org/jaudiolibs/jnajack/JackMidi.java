@@ -25,7 +25,6 @@
 package org.jaudiolibs.jnajack;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Static utility functions for working with MIDI data in JACK port buffers.
@@ -44,7 +43,7 @@ public class JackMidi {
      * @return Number of events
      * @throws JackException
      */
-    public static int getEventCount(@NotNull JackPort port) throws JackException {
+    public static int getEventCount(JackPort port) throws JackException {
         try {
             return port.jackLib.jack_midi_get_event_count(port.bufferPtr);
         } catch (Throwable e) {
@@ -64,8 +63,7 @@ public class JackMidi {
      * @param index index of event to retrieve ( 0 -> getEventCount() )
      * @throws JackException
      */
-    public static void eventGet(@NotNull Event event,
-                                @NotNull JackPort port,
+    public static void eventGet(Event event, JackPort port,
                                 int index) throws JackException {
         try {
             JackLibrary.jack_midi_event_t nativeEvent = event.nativeEvent;
@@ -90,7 +88,7 @@ public class JackMidi {
      * @param port
      * @throws JackException
      */
-    public static void clearBuffer(@NotNull JackPort port) throws JackException {
+    public static void clearBuffer(JackPort port) throws JackException {
         try {
             port.jackLib.jack_midi_clear_buffer(port.bufferPtr);
         } catch (Throwable e) {
@@ -108,7 +106,7 @@ public class JackMidi {
      * port.
      * @throws JackException
      */
-    public static int maxEventSize(@NotNull JackPort port) throws JackException {
+    public static int maxEventSize(JackPort port) throws JackException {
         try {
             return port.jackLib.jack_midi_max_event_size(port.bufferPtr);
         } catch (Throwable e) {
@@ -136,8 +134,8 @@ public class JackMidi {
      * @param data_size Length of data to be written
      * @throws JackException
      */
-    public static void eventWrite(@NotNull JackPort port,
-                                  int time, byte[] data, int data_size) throws JackException {
+    public static void eventWrite(JackPort port, int time,
+                                  byte[] data, int data_size) throws JackException {
         try {
             port.jackLib.jack_midi_event_write(port.bufferPtr, time, data, data_size);
         } catch (Throwable e) {
@@ -156,7 +154,7 @@ public class JackMidi {
      * @return Number of events that could not be written to the event buffer.
      * @throws JackException
      */
-    public static int getLostEventCount(@NotNull JackPort port) throws JackException {
+    public static int getLostEventCount(JackPort port) throws JackException {
         try {
             return port.jackLib.jack_midi_get_lost_event_count(port.bufferPtr);
         } catch (Throwable e) {
