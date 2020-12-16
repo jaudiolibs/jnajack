@@ -17,6 +17,7 @@ package org.jaudiolibs.jnajack;
 
 import java.util.EnumSet;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Wrapper for the native jack_position_t struct.
@@ -46,11 +47,11 @@ public class JackPosition {
         return nativePosition.frame;
     }
 
-    public void setValid(JackPositionBits valid) {
+    public void setValid(@NotNull JackPositionBits valid) {
         nativePosition.valid = valid.getIntValue();
     }
     
-    public void setValid(EnumSet<JackPositionBits> valid) {
+    public void setValid(@NotNull EnumSet<JackPositionBits> valid) {
         int v = 0;
         for (JackPositionBits bit : valid) {
             v |= bit.getIntValue();
@@ -58,7 +59,7 @@ public class JackPosition {
         nativePosition.valid = v;
     }
 
-    public EnumSet<JackPositionBits> getValid() {
+    public @NotNull EnumSet<JackPositionBits> getValid() {
         int bits = nativePosition.valid;
         EnumSet<JackPositionBits> ret = EnumSet.noneOf(JackPositionBits.class);
         for (JackPositionBits bit : JackPositionBits.values()) {

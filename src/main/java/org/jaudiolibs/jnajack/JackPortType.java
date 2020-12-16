@@ -25,6 +25,7 @@
 package org.jaudiolibs.jnajack;
 
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a type of Port in JACK. Replaces the port type Strings in JACK.
@@ -35,12 +36,12 @@ public class JackPortType {
     /**
      * Audio port.
      */
-    public final static JackPortType AUDIO =
+    public final static @NotNull JackPortType AUDIO =
             new JackPortType(JackLibrary.JACK_DEFAULT_AUDIO_TYPE, 0);
     /**
      * MIDI port.
      */
-    public final static JackPortType MIDI =
+    public final static @NotNull JackPortType MIDI =
             new JackPortType(JackLibrary.JACK_DEFAULT_MIDI_TYPE, 0);
 
     private String type;
@@ -54,7 +55,7 @@ public class JackPortType {
      * @param type String passed as type String to JACK
      * @param bufferSize passed to JACK when creating a Port of this type
      */
-    public JackPortType(String type, int bufferSize) {
+    public JackPortType(@NotNull String type, int bufferSize) {
         if (type == null) {
             throw new NullPointerException();
         }
@@ -66,7 +67,7 @@ public class JackPortType {
      * Get the Type String for this JackPortType
      * @return type
      */
-    public String getTypeString() {
+    public @NotNull String getTypeString() {
         return type;
     }
 
