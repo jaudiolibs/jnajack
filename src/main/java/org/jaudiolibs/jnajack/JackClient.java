@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary._jack_port;
 import org.jaudiolibs.jnajack.lowlevel.JackLibrary.jack_position_t;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
@@ -107,7 +109,9 @@ public class JackClient {
      * @return JackPort
      * @throws JackException
      */
-    public JackPort registerPort(String name, JackPortType type, EnumSet<JackPortFlags> flags)
+    public @NotNull JackPort registerPort(@NotNull String name,
+                                          @NotNull JackPortType type,
+                                          @NotNull EnumSet<JackPortFlags> flags)
             throws JackException {
         int fl = 0;
         for (JackPortFlags flag : flags) {
@@ -144,7 +148,9 @@ public class JackClient {
      * @return JackPort
      * @throws JackException
      */
-    public JackPort registerPort(String name, JackPortType type, JackPortFlags flag)
+    public @NotNull JackPort registerPort(@NotNull String name,
+                                          @NotNull JackPortType type,
+                                          @NotNull JackPortFlags flag)
             throws JackException {
         return registerPort(name, type, EnumSet.of(flag));
     }
@@ -165,7 +171,7 @@ public class JackClient {
      * @return int Jack integer return code indicating success
      * @throws JackException
      */
-    public int unregisterPort(JackPort port)
+    public int unregisterPort(@NotNull JackPort port)
             throws JackException {
         try {
             int ret = jackLib.jack_port_unregister(clientPtr, port.portPtr);
@@ -194,7 +200,7 @@ public class JackClient {
      * @param callback
      * @throws JackException
      */
-    public void setProcessCallback(JackProcessCallback callback) throws JackException {
+    public void setProcessCallback(@Nullable JackProcessCallback callback) throws JackException {
         if (callback == null) {
             try {
                 jackLib.jack_set_process_callback(clientPtr, null, null);
@@ -228,7 +234,7 @@ public class JackClient {
      * @throws JackException
      *
      */
-    public void setXrunCallback(JackXrunCallback callback) throws JackException {
+    public void setXrunCallback(@Nullable JackXrunCallback callback) throws JackException {
         if (callback == null) {
             try {
                 jackLib.jack_set_xrun_callback(clientPtr, null, null);
@@ -267,7 +273,7 @@ public class JackClient {
      * @since Jul 23, 2012
      */
     //cjritola 2012
-    public void setGraphOrderCallback(JackGraphOrderCallback callback)
+    public void setGraphOrderCallback(@NotNull JackGraphOrderCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException("Passed callback is null.");
@@ -297,7 +303,7 @@ public class JackClient {
      * @since Jul 23, 2012
      */
     //cjritola 2012
-    public void setClientRegistrationCallback(JackClientRegistrationCallback callback)
+    public void setClientRegistrationCallback(@NotNull JackClientRegistrationCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException("Passed callback is null.");
@@ -326,7 +332,7 @@ public class JackClient {
      * @since Jul 23, 2012
      */
     //cjritola 2012
-    public void setPortConnectCallback(JackPortConnectCallback callback)
+    public void setPortConnectCallback(@NotNull JackPortConnectCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException("Passed callback is null.");
@@ -355,7 +361,7 @@ public class JackClient {
      * @since Jul 23, 2012
      */
     //cjritola 2012
-    public void setPortRegistrationCallback(JackPortRegistrationCallback callback)
+    public void setPortRegistrationCallback(@NotNull JackPortRegistrationCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException("Passed callback is null.");
@@ -372,9 +378,9 @@ public class JackClient {
      * Set interface to be called if buffer size changes
      *
      * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
-    public void setBuffersizeCallback(JackBufferSizeCallback callback)
+    public void setBuffersizeCallback(@NotNull JackBufferSizeCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException();
@@ -398,9 +404,9 @@ public class JackClient {
      * Set interface to be called if sample rate changes.
      *
      * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
-    public void setSampleRateCallback(JackSampleRateCallback callback)
+    public void setSampleRateCallback(@NotNull JackSampleRateCallback callback)
             throws JackException {
         if (callback == null) {
             throw new NullPointerException();
@@ -427,7 +433,8 @@ public class JackClient {
      * @throws JackException
      * @author Matthew MacLeod
      */
-    public void setTimebaseCallback(JackTimebaseCallback callback, boolean conditional) throws JackException {
+    public void setTimebaseCallback(@NotNull JackTimebaseCallback callback,
+                                    boolean conditional) throws JackException {
         if (callback == null) {
             throw new NullPointerException();
         }
@@ -457,7 +464,7 @@ public class JackClient {
      * @throws JackException
      * @author Matthew MacLeod
      */
-    public void setSyncCallback(JackSyncCallback callback) throws JackException {
+    public void setSyncCallback(@NotNull JackSyncCallback callback) throws JackException {
         if (callback == null) {
             throw new NullPointerException();
         }
@@ -490,9 +497,9 @@ public class JackClient {
      * should be called before activate().
      *
      * @param callback
-     * @throws net.neilcsmith.jnajack.JackException
+     * @throws JackException
      */
-    public void onShutdown(JackShutdownCallback callback) throws JackException {
+    public void onShutdown(@Nullable JackShutdownCallback callback) throws JackException {
         userShutdownCallback = callback;
     }
 
@@ -552,7 +559,8 @@ public class JackClient {
      * @throws JackException
      * @author Matthew MacLeod
      */
-    public JackTransportState transportQuery(JackPosition position) throws JackException {
+    public @NotNull JackTransportState transportQuery(@NotNull JackPosition position)
+            throws JackException {
         try {
             int state = jackLib.jack_transport_query(clientPtr, position.getNativePosition());
             return JackTransportState.forVal(state);
@@ -606,7 +614,7 @@ public class JackClient {
      * @throws JackException
      * @author Matthew MacLeod
      */
-    public boolean transportReposition(JackPosition position) throws JackException {
+    public boolean transportReposition(@NotNull JackPosition position) throws JackException {
         try {
             return jackLib.jack_transport_reposition(clientPtr, position.getNativePosition()) == 0;
         } catch (Throwable e) {
@@ -673,7 +681,7 @@ public class JackClient {
         }
     }
 
-    public String getName() {
+    public @NotNull String getName() {
         return name;
     }
 
