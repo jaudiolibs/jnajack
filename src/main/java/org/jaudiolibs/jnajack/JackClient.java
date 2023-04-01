@@ -750,6 +750,21 @@ public class JackClient {
         }
     }
 
+    /**
+     * Check if the JACK subsystem is running with -R (--realtime)
+     *
+     * @return true if running in realtime mode
+     * @throws JackException
+     */
+    public boolean isRealtime() throws JackException {
+        try {
+            return jackLib.jack_is_realtime(clientPtr) == 1;
+        } catch (Throwable e) {
+            LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
+            throw new JackException(e);
+        }
+    }
+
     private void processShutdown() {
 //        clientPtr = null;
         if (userShutdownCallback != null) {
