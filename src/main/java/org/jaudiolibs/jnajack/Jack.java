@@ -64,7 +64,7 @@ public class Jack {
     private Method detachMethod;
     private Constructor<?> ctiConstructor;
 
-    private Jack(JackLibrary jackLib) {
+    Jack(JackLibrary jackLib) {
         this.jackLib = jackLib;
         if (!Boolean.getBoolean(PROP_DISABLE_CTI)) {
             initCallbackMethods();
