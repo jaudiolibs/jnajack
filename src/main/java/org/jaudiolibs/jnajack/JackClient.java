@@ -466,7 +466,7 @@ public class JackClient {
 
         int ret = -1;
         try {
-            jackLib.jack_set_sync_callback(clientPtr, wrapper, null);
+            ret = jackLib.jack_set_sync_callback(clientPtr, wrapper, null);
         } catch (Throwable e) {
             LOG.log(Level.SEVERE, CALL_ERROR_MSG, e);
             throw new JackException(e);
