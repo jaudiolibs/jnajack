@@ -1,0 +1,27 @@
+name: JNAJack
+
+on:
+  push:
+  pull_request:
+    # unlocked event is used as super secret restart button
+    types: [opened, synchronize, unlocked]
+
+jobs:
+  build-test:
+    name: Build and unit test on ${{ matrix.os }}, JDK ${{ matrix.java }}
+    strategy:
+      matrix:
+        java: [ '8', '17' ]
+        os: [ 'ubuntu-latest' ]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java }}
+        distribution: 'temurin'
+        cache: maven
+    - name: Build with Maven
+      run: mvn --batch-mode package
